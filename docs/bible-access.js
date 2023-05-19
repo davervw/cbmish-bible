@@ -272,7 +272,7 @@ const aboutBible = function () {
     const link1 = cbm.addLink("BIBLE", "https://github.com/davervw/cbmish-bible");
     cbm.out(" is built on ");
     const link2 = cbm.addLink("cbmish-script", "https://github.com/davervw/cbmish-script");
-    cbm.out(" which   provides a modern Commodore-like look   and feel for the web programmed in and  with TypeScript.");
+    cbm.out(" which   provides a retro Commodore-like look    and feel for the web programmed in and  with TypeScript.");
     cbm.newLine();
     let row = 0;
     let col = 0;
