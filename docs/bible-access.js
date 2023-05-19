@@ -90,6 +90,8 @@ const booksUI = function () {
     cbm.foreground(15);
     cbm.reverse = true;
     cbm.out("[Click to navigate]");
+    cbm.reverse = false;
+    cbm.foreground(1);
 };
 const bookUI = function (book) {
     cbm.removeButtons();
