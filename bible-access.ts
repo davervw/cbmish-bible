@@ -52,10 +52,15 @@ function findText(text) {
 
 ////////////////////////////////////////////////////////////////////////
 
+var scale = '';
+
 const bibleUI = function() {
   cbm.hideCursor();
   cbm.underline(6);
   let params = new URLSearchParams(window.location.search);
+  let scaleValue = params.get('scale');
+  if (scaleValue != null && scaleValue != '1')
+    scale = `&scale=${scaleValue}`
   let book = params.get('book');
   let chapter = params.get('chapter');
   let verse = params.get('verse');
@@ -172,7 +177,7 @@ const chapterUI = function(book: string, chapter: string) {
     const link = cbm.addLink(verse, null);
     link.onclick = () => setTimeout( () => { 
       const entry = verseUI(book, chapter, verse);
-      history.pushState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}`);
+      history.pushState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}${scale}`);
     }, 250);
     col += verse.length;
     if (col < cols) {
@@ -190,7 +195,7 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
   const entry = findVerse(book, chapter, verse);
   if (entry == null)
     return entry;
-  history.replaceState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}`);  
+  history.replaceState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}${scale}`);
   {
     const link = cbm.addLink('<', null);
     link.onclick = () => setTimeout( () => { versePreviousUI(book, chapter, verse); }, 250);
