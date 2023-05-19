@@ -51,12 +51,12 @@ const booksUI = function () {
     cbm.clear();
     cbm.underline(6);
     cbm.foreground(3);
-    const about = cbm.addLink('BIBLE', '');
+    const about = cbm.addLink('BIBLE', null);
     about.onclick = () => setTimeout(() => { aboutBible(); }, 250);
     cbm.newLine();
     cbm.newLine();
     cbm.foreground(15);
-    cbm.out('OLD TESTAMENT');
+    cbm.out('OLD TESTAMENT:');
     cbm.newLine();
     const books = getBooks();
     const cols = cbm.getWidth() / 8;
@@ -72,10 +72,11 @@ const booksUI = function () {
                 cbm.newLine();
                 col = 0;
             }
-            cbm.out('NEW TESTAMENT');
+            cbm.newLine();
+            cbm.out('NEW TESTAMENT:');
             cbm.newLine();
         }
-        const link = cbm.addLink(book, book);
+        const link = cbm.addLink(book, null);
         link.onclick = () => setTimeout(() => { bookUI(book); }, 250);
         col += book.length;
         if (col < cols) {
@@ -88,12 +89,13 @@ const booksUI = function () {
     cbm.locate(0, cbm.getHeight() / 8 - 1);
     cbm.foreground(15);
     cbm.reverse = true;
-    cbm.out("[Use mouse to navigate]");
+    cbm.out("[Click to navigate]");
 };
 const bookUI = function (book) {
     cbm.removeButtons();
     cbm.clear();
-    cbm.out(book);
+    const back = cbm.addLink(book, null);
+    back.onclick = () => setTimeout(() => { booksUI(); }, 250);
     cbm.newLine();
     cbm.newLine();
     cbm.out("CHAPTERS");
@@ -107,7 +109,7 @@ const bookUI = function (book) {
             cbm.newLine();
             col = 0;
         }
-        const link = cbm.addLink(chapter, chapter);
+        const link = cbm.addLink(chapter, null);
         link.onclick = () => setTimeout(() => { chapterUI(book, chapter); }, 250);
         col += chapter.length;
         if (col < cols) {
@@ -121,7 +123,11 @@ const bookUI = function (book) {
 const chapterUI = function (book, chapter) {
     cbm.removeButtons();
     cbm.clear();
-    cbm.out(`${book} ${chapter}`);
+    const goBooks = cbm.addLink(book, null);
+    goBooks.onclick = () => setTimeout(() => { booksUI(); }, 250);
+    cbm.out(' ');
+    const goChapters = cbm.addLink(chapter, null);
+    goChapters.onclick = () => setTimeout(() => { bookUI(book); }, 250);
     cbm.newLine();
     cbm.newLine();
     cbm.out("VERSES");
@@ -135,7 +141,7 @@ const chapterUI = function (book, chapter) {
             cbm.newLine();
             col = 0;
         }
-        const link = cbm.addLink(verse, verse);
+        const link = cbm.addLink(verse, null);
         link.onclick = () => setTimeout(() => { verseUI(book, chapter, verse); }, 250);
         col += verse.length;
         if (col < cols) {
@@ -241,7 +247,7 @@ const aboutBible = function () {
     cbm.removeButtons();
     cbm.clear();
     cbm.underline(15);
-    const link1 = cbm.addLink("BIBLE", "https://github.com/davervw/cbmish-script/tree/bible");
+    const link1 = cbm.addLink("BIBLE", "https://github.com/davervw/cbmish-bible");
     cbm.out(" is built on ");
     const link2 = cbm.addLink("cbmish-script", "https://github.com/davervw/cbmish-script");
     cbm.out(" which   provides a modern Commodore-like look   and feel for the web programmed in and  with TypeScript.");
