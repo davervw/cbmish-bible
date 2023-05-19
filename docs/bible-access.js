@@ -44,7 +44,19 @@ function findText(text) {
 ////////////////////////////////////////////////////////////////////////
 const bibleUI = function () {
     cbm.hideCursor();
-    booksUI();
+    cbm.underline(6);
+    let params = new URLSearchParams(window.location.search);
+    let book = params.get('book');
+    let chapter = params.get('chapter');
+    let verse = params.get('verse');
+    if (book == null)
+        booksUI();
+    else if (chapter == null)
+        bookUI(book);
+    else if (verse == null)
+        chapterUI(book, chapter);
+    else
+        verseUI(book, chapter, verse);
 };
 const booksUI = function () {
     cbm.removeButtons();
@@ -144,7 +156,10 @@ const chapterUI = function (book, chapter) {
             col = 0;
         }
         const link = cbm.addLink(verse, null);
-        link.onclick = () => setTimeout(() => { verseUI(book, chapter, verse); }, 250);
+        link.onclick = () => setTimeout(() => {
+            const entry = verseUI(book, chapter, verse);
+            history.pushState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}`);
+        }, 250);
         col += verse.length;
         if (col < cols) {
             cbm.out(' ');
@@ -160,6 +175,7 @@ const verseUI = function (book, chapter, verse) {
     const entry = findVerse(book, chapter, verse);
     if (entry == null)
         return entry;
+    history.replaceState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}`);
     {
         const link = cbm.addLink('<', null);
         link.onclick = () => setTimeout(() => { versePreviousUI(book, chapter, verse); }, 250);
