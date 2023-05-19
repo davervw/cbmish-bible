@@ -2,7 +2,7 @@
 
 ## About ##
 
-Bible navigation hosted in an 8-bit familiar user interface.
+Bible navigation hosted in an 8-bit familiar user interface.  Forked from [cbmish-script](https://github.com/davervw/cbmish-script)
 
 ![Browsing books of the Bible](bible.png)
 
