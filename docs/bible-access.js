@@ -43,6 +43,7 @@ function findText(text) {
 }
 ////////////////////////////////////////////////////////////////////////
 var scale = '';
+var quiet = false;
 const bibleUI = function () {
     cbm.hideCursor();
     cbm.underline(6);
@@ -50,6 +51,9 @@ const bibleUI = function () {
     let scaleValue = params.get('scale');
     if (scaleValue != null && scaleValue != '1')
         scale = `&scale=${scaleValue}`;
+    quiet = (params.get('q') != null);
+    if (quiet)
+        scale += "&q";
     let book = params.get('book');
     let chapter = params.get('chapter');
     let verse = params.get('verse');
@@ -103,12 +107,7 @@ const booksUI = function () {
         if (col == cols)
             col = 0;
     });
-    cbm.locate(0, cbm.getHeight() / 8 - 1);
-    cbm.foreground(15);
-    cbm.reverse = true;
-    cbm.out("[Click BIBLE, or book name to navigate]");
-    cbm.reverse = false;
-    cbm.foreground(1);
+    addNavigationHelp("[Click BIBLE, or book to navigate]", () => booksUI());
 };
 const bookUI = function (book) {
     history.replaceState(null, '', `?book=${book}${scale}`);
@@ -139,12 +138,7 @@ const bookUI = function (book) {
         if (col == cols)
             col = 0;
     }
-    cbm.locate(0, cbm.getHeight() / 8 - 1);
-    cbm.foreground(15);
-    cbm.reverse = true;
-    cbm.out("[Click book name, or #s to navigate]");
-    cbm.reverse = false;
-    cbm.foreground(1);
+    addNavigationHelp("[Click book name, or #s to navigate]", () => bookUI(book));
 };
 const chapterUI = function (book, chapter) {
     history.replaceState(null, '', `?book=${book}&chapter=${chapter}${scale}`);
@@ -181,12 +175,7 @@ const chapterUI = function (book, chapter) {
         if (col == cols)
             col = 0;
     }
-    cbm.locate(0, cbm.getHeight() / 8 - 1);
-    cbm.foreground(15);
-    cbm.reverse = true;
-    cbm.out("[Click book name, or #s to navigate]");
-    cbm.reverse = false;
-    cbm.foreground(1);
+    addNavigationHelp("[Click book name, or #s to navigate]", () => chapterUI(book, chapter));
 };
 const verseUI = function (book, chapter, verse) {
     cbm.foreground(1);
@@ -247,12 +236,7 @@ const verseUI = function (book, chapter, verse) {
                 col = 0;
         }
     });
-    cbm.locate(0, cbm.getHeight() / 8 - 1);
-    cbm.foreground(15);
-    cbm.reverse = true;
-    cbm.out("[Click book name, or #s to navigate]");
-    cbm.reverse = false;
-    cbm.foreground(1);
+    addNavigationHelp("[Click book name, or #s to navigate]", () => verseUI(book, chapter, verse));
     return entry;
 };
 const versePreviousUI = function (book, chapter, verse) {
@@ -335,5 +319,33 @@ const aboutBible = function () {
         history.replaceState(null, '', `?bible${scale}`);
         mainMenu();
     }, 250);
+};
+const addNavigationHelp = function (message, homefn) {
+    cbm.locate(0, cbm.getHeight() / 8 - 1);
+    cbm.foreground(15);
+    cbm.reverse = true;
+    if (quiet) {
+        const help = cbm.addLink('?', null);
+        help.onclick = () => setTimeout(() => {
+            if (quiet) {
+                quiet = false;
+                scale = scale.substring(0, scale.length - 2);
+                homefn();
+            }
+        }, 250);
+    }
+    else {
+        const unhelp = cbm.addLink('-', null);
+        unhelp.onclick = () => setTimeout(() => {
+            if (!quiet) {
+                quiet = true;
+                scale += '&q';
+                homefn();
+            }
+        }, 250);
+        cbm.out(message);
+    }
+    cbm.reverse = false;
+    cbm.foreground(1);
 };
 //# sourceMappingURL=bible-access.js.map
