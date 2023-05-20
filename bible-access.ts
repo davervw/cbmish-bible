@@ -1,4 +1,5 @@
 // example of accessing Bible text from JSON via JavaScript
+// and making it *look* like an 8-bit famous system
 
 const books = getBooks();
 

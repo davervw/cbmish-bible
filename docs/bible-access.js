@@ -1,4 +1,5 @@
 // example of accessing Bible text from JSON via JavaScript
+// and making it *look* like an 8-bit famous system
 const books = getBooks();
 // MIT LICENSE
 // bible.js Copyright 2023 by David Van Wagner dave@davevw.com
