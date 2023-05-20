@@ -30,7 +30,7 @@ function getBooks() {
   return bible.filter(x => x.chapter == "1" && x.verse == "1").map(x => x.book);
 }
 
-function findVerse(book, chapter, verse) {
+function findVerse(book: string, chapter: string, verse: string) {
   return bible.find(x => x.book == book && x.chapter == chapter && x.verse == verse);
 }
 
@@ -38,17 +38,29 @@ function countBooks() {
   return books.length;
 }
 
-function countChapters(book) {
+function countChapters(book: string) {
   return bible.filter(x => x.book == book && x.verse == "1").length;
 }
 
-function countVerses(book, chapter) {
+function countVerses(book: string, chapter: string) {
   return bible.filter(x => x.book == book && x.chapter == chapter).length;
 }
 
-function findText(text) {
+function findText(text: string) {
   text = text.toLowerCase();
   return bible.filter(x => x.text.toLowerCase().includes(text));
+}
+
+function findLongestText(): any {
+  let longestVerse = null;
+  let longestLength = 0;
+  bible.forEach(x => {
+    if (x.text.length > longestLength) {
+      longestLength = x.text.length;
+      longestVerse = x;
+    }
+  });
+  return longestVerse;
 }
 
 ////////////////////////////////////////////////////////////////////////

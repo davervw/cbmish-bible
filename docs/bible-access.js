@@ -42,6 +42,17 @@ function findText(text) {
     text = text.toLowerCase();
     return bible.filter(x => x.text.toLowerCase().includes(text));
 }
+function findLongestText() {
+    let longestVerse = null;
+    let longestLength = 0;
+    bible.forEach(x => {
+        if (x.text.length > longestLength) {
+            longestLength = x.text.length;
+            longestVerse = x;
+        }
+    });
+    return longestVerse;
+}
 ////////////////////////////////////////////////////////////////////////
 var scale = '';
 var quiet = false;
