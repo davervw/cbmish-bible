@@ -5,12 +5,12 @@ const books = getBooks();
 // MIT LICENSE
 // bible.js Copyright 2023 by David Van Wagner dave@davevw.com
 //
-// Permission is hereby granted, free of charge, to any person 
-// obtaining a copy of this software and associated documentation files 
-// (the “Software”), to deal in the Software without restriction, 
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation files
+// (the “Software”), to deal in the Software without restriction,
 // including without limitation the rights to use, copy, modify, merge,
-// publish, distribute, sublicense, and/or sell copies of the Software, 
-// and to permit persons to whom the Software is furnished to do so, 
+// publish, distribute, sublicense, and/or sell copies of the Software,
+// and to permit persons to whom the Software is furnished to do so,
 // subject to the following conditions:
 //
 // The above copyright notice and this permission notice shall be
@@ -18,7 +18,7 @@ const books = getBooks();
 //
 // THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
 // BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
@@ -75,6 +75,7 @@ const bibleUI = function() {
 }
 
 const booksUI = function() {
+  history.replaceState(null, '', `?bible${scale}`);
   cbm.removeButtons();
   cbm.clear();
   cbm.underline(6);
@@ -118,12 +119,13 @@ const booksUI = function() {
   cbm.locate(0, cbm.getHeight()/8-1);
   cbm.foreground(15);
   cbm.reverse = true;
-  cbm.out("[Click to navigate]");
+  cbm.out("[Click BIBLE, or book name to navigate]");
   cbm.reverse = false;
   cbm.foreground(1);
 }
 
 const bookUI = function(book: string) {
+  history.replaceState(null, '', `?book=${book}${scale}`);
   cbm.removeButtons();
   cbm.clear();
   const back = cbm.addLink(book, null);
@@ -151,9 +153,16 @@ const bookUI = function(book: string) {
     if (col == cols)
       col = 0;
   }
+  cbm.locate(0, cbm.getHeight()/8-1);
+  cbm.foreground(15);
+  cbm.reverse = true;
+  cbm.out("[Click book name, or #s to navigate]");
+  cbm.reverse = false;
+  cbm.foreground(1);
 }
 
 const chapterUI = function(book: string, chapter: string) {
+  history.replaceState(null, '', `?book=${book}&chapter=${chapter}${scale}`);
   cbm.removeButtons();
   cbm.clear();
   const goBooks = cbm.addLink(book, null);
@@ -175,7 +184,7 @@ const chapterUI = function(book: string, chapter: string) {
       col = 0;
     }
     const link = cbm.addLink(verse, null);
-    link.onclick = () => setTimeout( () => { 
+    link.onclick = () => setTimeout( () => {
       const entry = verseUI(book, chapter, verse);
       history.pushState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}${scale}`);
     }, 250);
@@ -187,9 +196,16 @@ const chapterUI = function(book: string, chapter: string) {
     if (col == cols)
       col = 0;
   }
+  cbm.locate(0, cbm.getHeight()/8-1);
+  cbm.foreground(15);
+  cbm.reverse = true;
+  cbm.out("[Click book name, or #s to navigate]");
+  cbm.reverse = false;
+  cbm.foreground(1);
 }
 
 const verseUI = function(book: string, chapter: string, verse: string): any {
+  cbm.foreground(1);
   cbm.removeButtons();
   cbm.clear();
   const entry = findVerse(book, chapter, verse);
@@ -247,6 +263,12 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
         col = 0;
     }
   });
+  cbm.locate(0, cbm.getHeight()/8-1);
+  cbm.foreground(15);
+  cbm.reverse = true;
+  cbm.out("[Click book name, or #s to navigate]");
+  cbm.reverse = false;
+  cbm.foreground(1);
   return entry;
 }
 
@@ -287,21 +309,51 @@ const nextBook = function(book: string): string {
 }
 
 const aboutBible = function() {
+  history.replaceState(null, '', `?button=BIBLE${scale}`);
   cbm.removeButtons();
   cbm.clear();
   cbm.underline(15);
-  const link1 = cbm.addLink("BIBLE", "https://github.com/davervw/cbmish-bible");
+  cbm.newLine();
+  cbm.foreground(1);
+  cbm.out("About");
+  cbm.newLine();
+  cbm.newLine();
+  cbm.out("BIBLE");
   cbm.out(" is built on ");
-  const link2 = cbm.addLink("cbmish-script", "https://github.com/davervw/cbmish-script");
+  cbm.out("cbmish-script");
   cbm.out(" which   provides a retro Commodore-like look    and feel for the web programmed in and  with TypeScript.");
+  cbm.newLine();
+  cbm.newLine();
+  cbm.foreground(15);
+  cbm.out('Open Source (MIT LICENSE)');
+  cbm.newLine();
+  cbm.out('Copyright (c) 2023 by David Van Wagner');
+  cbm.newLine();
+  cbm.foreground(3);
+  cbm.out("BIBLE ");
+  cbm.foreground(15);
+  const link1 = cbm.addLink("github.com/davervw/cbmish-bible", "https://github.com/davervw/cbmish-bible");
+  cbm.newLine();
+  cbm.foreground(3);
+  cbm.out("cbm-ish ");
+  cbm.foreground(15);
+  const link2 = cbm.addLink("github.com/davervw/cbmish-script", "https://github.com/davervw/cbmish-script");
+  cbm.newLine();
   cbm.newLine();
   let row = 0;
   let col = 0;
   [row, col] = cbm.locate(0,0);
   cbm.locate(col, row);
-  const button1 = cbm.addButton("Bible");
-  button1.onclick = () => setTimeout( () => { bibleUI(); }, 250);
+  cbm.foreground(1);
+  const button1 = cbm.addButton("Back");
+  button1.onclick = () => setTimeout( () => {
+    history.replaceState(null, '', `?bible${scale}`);
+    bibleUI();
+  }, 250);
   cbm.locate(col+7, row);
-  const button2 = cbm.addButton("Samples");
-  button2.onclick = () => setTimeout( () => { mainMenu(); }, 250);
+  const button2 = cbm.addButton("CBM Samples");
+  button2.onclick = () => setTimeout( () => {
+    history.replaceState(null, '', `?bible${scale}`);
+    mainMenu();
+  }, 250);
 }
