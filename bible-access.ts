@@ -252,7 +252,7 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
         col = 0;
     }
   });
-  addNavigationHelp("[Click book name, or #s to navigate]", () => verseUI(book, chapter, verse));
+  addNavigationHelp("[Click book name, <>, #s to navigate]", () => verseUI(book, chapter, verse));
   return entry;
 }
 

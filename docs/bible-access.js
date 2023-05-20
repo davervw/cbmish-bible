@@ -236,7 +236,7 @@ const verseUI = function (book, chapter, verse) {
                 col = 0;
         }
     });
-    addNavigationHelp("[Click book name, or #s to navigate]", () => verseUI(book, chapter, verse));
+    addNavigationHelp("[Click book name, <>, #s to navigate]", () => verseUI(book, chapter, verse));
     return entry;
 };
 const versePreviousUI = function (book, chapter, verse) {
