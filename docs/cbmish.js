@@ -871,6 +871,7 @@ class CbmishConsole {
             button.checkLeave();
     }
     addButton(text, context = undefined, rounded = true, draw = true) {
+        const saveLowercase = this.lowercase;
         this.lowercase = false;
         const normalCorners = (rounded)
             ? '' + this.chr$(0x75) + this.chr$(0x69) + this.chr$(0x6A) + this.chr$(0x6B)
@@ -980,6 +981,7 @@ class CbmishConsole {
                 console.log(`onClick: ${button.text}`);
             }
         };
+        this.lowercase = saveLowercase;
         this.buttons.push(button);
         return button;
     }
@@ -987,10 +989,11 @@ class CbmishConsole {
         const button = this.addButton(text, link, false, false);
         button.bottom = button.top + 1;
         button.right = button.left + text.length;
-        button.normal = this.chr$(14) + this.chr$(2) + text + this.chr$(130);
-        this.out(button.normal);
-        button.hover = this.chr$(14) + this.chr$(18) + text + this.chr$(146);
+        const setcase = this.lowercase ? this.chr$(14) : this.chr$(142);
+        button.normal = setcase + this.chr$(2) + (this.reverse ? this.chr$(18) : this.chr$(146)) + text + this.chr$(130) + this.chr$(146);
+        button.hover = setcase + (this.reverse ? this.chr$(146) : this.chr$(18)) + text + this.chr$(146);
         button.onclick = () => window.open(button.context);
+        this.out(button.normal);
         return button;
     }
     findButton(text, contains = false) {

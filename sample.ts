@@ -82,6 +82,7 @@ const mainMenu = function() {
 
     cbm.locate(x, y+=3);
     cbm.fg = 10;
+    cbm.lowercase = false;
     const b4 = cbm.addButton("Maze"+cbm.chr$(110)+cbm.chr$(109)+cbm.chr$(110)+cbm.chr$(109));
     b4.onclick = () => {
         setTimeout(
@@ -331,6 +332,7 @@ const dissolve = function () {
 const loresPlotDemo = function () {
     cbm.clear();
     
+    cbm.lowercase = true;
     const link_text = 'link: blog entry';
     const link_url = 'https://techwithdave.davevw.com/2021/04/low-resolution-graphics-for-commodore.html';
     cbm.locate((cbm.getCols() - link_text.length) / 2, cbm.getRows() - 2);
@@ -372,6 +374,7 @@ const loresSineWave = function () {
             const link_text = 'link: tweet';
             const link_url = 'https://twitter.com/DaveRVW/status/1547040376367636480';
             cbm.locate(cbm.getCols() * 0.55, cbm.getRows() - 3);
+            cbm.lowercase = true;
             cbm.addLink(link_text, link_url);
                     cbm.locate(0, 19);
             cbm.out('READY');
@@ -451,6 +454,7 @@ const dragonDemo = function () {
     cbm.redrawButtons();
     cbm.hideCursor();
     cbm.locate(2, 23);
+    cbm.lowercase = true;
     cbm.addLink('link: orig. knight/dragon blog entry', 'https://techwithdave.davevw.com/2022/08/knight-vs-dragon-prototype-on-commodore.html');
     cbm.homeScreen();
 
