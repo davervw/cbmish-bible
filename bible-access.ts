@@ -86,15 +86,21 @@ const bibleUI = function() {
   quiet = (params.get('q') != null);
   if (quiet)
     scale += "&q";
+  let button = params.get('button');
   let book = params.get('book');
   let chapter = params.get('chapter');
   let verse = params.get('verse');
-  if (book == null)
+  let word = params.get('word');  
+  if (button == 'stats')
+    bibleStats();
+  else if (book == null)
     booksUI();
   else if (chapter == null)
     bookUI(book);
   else if (verse == null)
     chapterUI(book, chapter);
+  else if (word != null)
+    wordUI(word, findVerse(book, chapter, verse));
   else
     verseUI(book, chapter, verse);
 }
@@ -403,6 +409,7 @@ const bibleStats = function() {
   cbm.lowercase = true;
   cbm.removeButtons();
   cbm.clear();
+  history.replaceState(null, '', `?button=stats${scale}`);
   const numBooks = countBooks();
   const numVerses = bible.length;
   let numChapters = 0;
@@ -422,7 +429,7 @@ const bibleStats = function() {
   let words = new Set();
   let punctuation = new Set();
   bible.forEach(x => {
-    if (x.verse > maxVerse.verse) {
+    if (Number(x.verse) > Number(maxVerse.verse)) {
       maxVerse = x;
     }
     countBytes += (x.text.length + 1); // add newline
@@ -451,51 +458,82 @@ const bibleStats = function() {
       longestWord = word;
   });
 
-  cbm.out('BIBLE KJV 1611\r');
+  cbm.underline(6);
+  cbm.addLink('BIBLE KJV 1611', 'https://en.wikipedia.org/wiki/King_James_Version');
   cbm.newLine();
-  cbm.out(`${numBooks} books\r`);
+  cbm.newLine();
+  cbm.addLink(`${numBooks} books`, null)
+    .onclick = () => setTimeout(() => booksUI(), 250);
+  cbm.newLine();
   cbm.out(`${numChapters} total chapters\r`);
   cbm.out(`${numVerses} total verses\r`);
   cbm.out(`${countBytes} total bytes of text\r`);
   cbm.out(`${countWords} total words\r`)
   cbm.out(`${words.size} distinct words\r`)
   cbm.newLine();
-  cbm.out(`${maxChaptersBook} has ${maxChaptersCount} chapters\r`);
-  cbm.out(`${maxVerse.book} ${maxVerse.chapter} has ${maxVerse.verse} verses\r`);
-  cbm.out(`longest word is ${longestWord}\r`);
+  cbm.addLink(`${maxChaptersBook} has ${maxChaptersCount} chapters`, null)
+    .onclick = () => setTimeout(() => bookUI(maxChaptersBook), 250);
+  cbm.newLine();
+  cbm.addLink(`${maxVerse.book} ${maxVerse.chapter} has ${maxVerse.verse} verses`, null)
+    .onclick = () => setTimeout(() => chapterUI(maxVerse.book, maxVerse.chapter), 250);
+  cbm.newLine();
+  cbm.addLink(`longest word is ${longestWord}\r`, null)
+    .onclick = () => setTimeout(() => wordUI(longestWord, null), 250);
 
   const unicorns = findText('unicorn');
-  cbm.out(`unicorn: ${unicorns.length}\r`);
+  cbm.addLink(`unicorn: ${unicorns.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('unicorn', null), 250);
+  cbm.newLine();
 
   const dragons = findText('dragon');
-  cbm.out(`dragon: ${dragons.length}\r`);
+  cbm.addLink(`dragon: ${dragons.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('dragon', null), 250);
+  cbm.newLine();
 
   const satans = findText('satan');
-  cbm.out(`satan: ${satans.length}\r`);
+  cbm.addLink(`satan: ${satans.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('satan', null), 250);
+  cbm.newLine();
 
   const loves = findText('love');
-  cbm.out(`love: ${loves.length}\r`);
+  cbm.addLink(`love: ${loves.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('love', null), 250);
+  cbm.newLine();
 
   const sufferings = findText('suffering');
-  cbm.out(`suffering: ${sufferings.length}\r`);
+  cbm.addLink(`suffering: ${sufferings.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('suffering', null), 250);
+  cbm.newLine();
 
   const jesus = findText('Jesus', true, true);
-  cbm.out(`Jesus: ${jesus.length}\r`);
+  cbm.addLink(`Jesus: ${jesus.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('Jesus', null), 250);
+  cbm.newLine();
 
   const abrahams = findText('Abraham', true, true);
-  cbm.out(`Abraham: ${abrahams.length}\r`);
+  cbm.addLink(`Abraham: ${abrahams.length}`, null)
+    .onclick = () => setTimeout(() => wordUI('Abraham', null, true), 250);
+  cbm.newLine();
 
   const God = findText('God', true, true);
-  cbm.out(`God [word, case]: ${God.length}\r`);
+  cbm.addLink(`God [word, case]: ${God.length}`, null)
+  .onclick = () => setTimeout(() => wordUI('God', null, true, true), 250);
+  cbm.newLine();
 
   const godCase = findText('god', false, true);
-  cbm.out(`god [case]: ${godCase.length}\r`);
+  cbm.addLink(`god [case]: ${godCase.length}`, null)
+  .onclick = () => setTimeout(() => wordUI('god', null, false, true), 250);
+  cbm.newLine();
 
   const godWord = findText('god', true, false);
-  cbm.out(`god [word]: ${godWord.length}\r`);
+  cbm.addLink(`god [word]: ${godWord.length}`, null)
+  .onclick = () => setTimeout(() => wordUI('god', null, true, false), 250);
+  cbm.newLine();
 
   const god = findText('god');
-  cbm.out(`god: ${god.length}\r`);
+  cbm.addLink(`god: ${god.length}`, null)
+  .onclick = () => setTimeout(() => wordUI('god', null), 250);
+  cbm.newLine();
 
   cbm.out('punctuation:');
   punctuation.forEach((ch: string) => cbm.out(ch));
@@ -506,7 +544,7 @@ const bibleStats = function() {
   back.onclick = () => setTimeout(() => aboutBible(), 250);
 }
 
-const wordUI = function(word: string, entry: any) {
+const wordUI = function(word: string, entry: any, wholeWord = false, exactCase = false) {
   cbm.removeButtons();
   cbm.foreground(1);
   cbm.clear();
@@ -521,17 +559,28 @@ const wordUI = function(word: string, entry: any) {
     word = word.substring(0, word.length-1); // remove punctuation
   }
 
-  history.replaceState(null, '', `?word=${word}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
+  if (entry == null)
+    history.replaceState(null, '', `?word=${word}${scale}`);
+  else
+    history.replaceState(null, '', `?word=${word}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
 
   cbm.out(`Search: ${word} `);
-  let options = { 'word': false, 'case': false };
+  let options = { 'word': wholeWord, 'case': exactCase };
   cbm.newLine();
   buildCheckboxControl('word', options, 'word');
   cbm.out(' ');
   buildCheckboxControl('case', options, 'case');
 
   const results = findText(word, options.word, options.case);
-  cbm.out(` ${results.length} matches\r`);
+  cbm.out(` ${results.length} matches `);
+  cbm.addLink('<', null)
+    .onclick = () => setTimeout(() => {
+      if (entry != null)
+        verseUI(entry.book, entry.chapter, entry.verse);
+      else
+        bibleUI();
+    }, 250);
+  cbm.newLine();
 
   const rows = cbm.getRows();
   const cols = cbm.getCols();
