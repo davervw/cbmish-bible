@@ -246,7 +246,8 @@ const verseUI = function (book, chapter, verse) {
                 cbm.newLine();
                 col = 0;
             }
-            cbm.out(word);
+            const link = cbm.addLink(word, null);
+            link.onclick = () => setTimeout(() => { wordUI(word, entry); }, 250);
             col += word.length;
             if (col < cols) {
                 cbm.out(' ');
@@ -464,5 +465,50 @@ const bibleStats = function () {
     cbm.locate(cbm.getWidth() / 8 - 7, cbm.getHeight() / 8 - 3);
     const back = cbm.addButton("Back");
     back.onclick = () => setTimeout(() => aboutBible(), 250);
+};
+const wordUI = function (word, entry) {
+    cbm.removeButtons();
+    cbm.foreground(1);
+    cbm.clear();
+    let i = word.indexOf("'");
+    if (i >= 0)
+        word = word.substring(0, i); // remove 's or similar
+    while (word.length > 0) {
+        const last = word.charAt(word.length - 1);
+        if (last >= 'a' && last <= 'z' || last >= 'A' && last <= 'Z')
+            break;
+        word = word.substring(0, word.length - 1); // remove punctuation
+    }
+    history.replaceState(null, '', `?word=${word}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
+    cbm.out(`Search: ${word} `);
+    let options = { 'word': false, 'case': false };
+    cbm.newLine();
+    buildCheckboxControl('word', options, 'word');
+    cbm.out(' ');
+    buildCheckboxControl('case', options, 'case');
+    const results = findText(word, options.word, options.case);
+    cbm.out(` ${results.length} matches\r`);
+    const rows = cbm.getRows();
+    const cols = cbm.getCols();
+    let row = 2;
+    for (i = 0; i < results.length && i < rows - 2; ++i) {
+        const entry = results[i];
+        const text = entry.text.replace(/[\[\]#]/g, '');
+        let line = `${entry.book} ${entry.chapter}:${entry.verse} ${text}`;
+        if (line.length > cols)
+            line = line.substring(0, cols - 4) + "...";
+        const link = cbm.addLink(line, null);
+        if (line.length < cols && i < rows - 3)
+            cbm.newLine();
+        link.onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
+    }
+};
+const buildCheckboxControl = function (text, options, field) {
+    let flag = false;
+    let label = `[${flag ? 'X' : ' '}] ${text}`;
+    const link = cbm.addLink(label, null);
+    link.onclick = () => {
+        flag = !flag;
+    };
 };
 //# sourceMappingURL=bible-access.js.map
