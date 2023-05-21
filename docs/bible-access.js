@@ -38,9 +38,17 @@ function countChapters(book) {
 function countVerses(book, chapter) {
     return bible.filter(x => x.book == book && x.chapter == chapter).length;
 }
-function findText(text) {
-    text = text.toLowerCase();
-    return bible.filter(x => x.text.toLowerCase().includes(text));
+function findText(text, wholeWord = false, matchCase = false) {
+    if (!matchCase)
+        text = text.toLowerCase();
+    let matches = bible.filter(x => (matchCase ? x.text : x.text.toLowerCase()).includes(text));
+    if (wholeWord) {
+        matches = matches.filter(x => {
+            const verseWords = x.text.split(/([_\W])/).filter(x => x.match(/[a-zA-Z0-9]/) != null);
+            return (verseWords.find(x => matchCase ? x : x.toLowerCase() == text) != null);
+        });
+    }
+    return matches;
 }
 function findLongestText() {
     let longestVerse = null;
@@ -89,7 +97,7 @@ const booksUI = function () {
     cbm.newLine();
     cbm.newLine();
     cbm.foreground(15);
-    cbm.out('OLD TESTAMENT:');
+    cbm.out('Old Testament:');
     cbm.newLine();
     const books = getBooks();
     const cols = cbm.getWidth() / 8;
@@ -106,7 +114,7 @@ const booksUI = function () {
                 col = 0;
             }
             cbm.newLine();
-            cbm.out('NEW TESTAMENT:');
+            cbm.out('New Testament:');
             cbm.newLine();
         }
         const link = cbm.addLink(book, null);
@@ -287,6 +295,7 @@ const aboutBible = function () {
     history.replaceState(null, '', `?button=BIBLE${scale}`);
     cbm.removeButtons();
     cbm.clear();
+    cbm.lowercase = true;
     cbm.underline(15);
     cbm.newLine();
     cbm.foreground(1);
@@ -326,8 +335,13 @@ const aboutBible = function () {
         bibleUI();
     }, 250);
     cbm.locate(col + 7, row);
-    const button2 = cbm.addButton("CBM Samples");
+    const button2 = cbm.addButton("Bible stats");
     button2.onclick = () => setTimeout(() => {
+        bibleStats();
+    }, 250);
+    cbm.locate(col + 21, row);
+    const button3 = cbm.addButton("CBM Samples");
+    button3.onclick = () => setTimeout(() => {
         history.replaceState(null, '', `?bible${scale}`);
         mainMenu();
     }, 250);
@@ -359,5 +373,116 @@ const addNavigationHelp = function (message, homefn) {
     }
     cbm.reverse = false;
     cbm.foreground(1);
+};
+const bibleStats = function () {
+    cbm.lowercase = true;
+    cbm.removeButtons();
+    cbm.clear();
+    const numBooks = countBooks();
+    const numVerses = bible.length;
+    let numChapters = 0;
+    let maxChaptersCount = 0;
+    let maxChaptersBook = null;
+    books.forEach(book => {
+        const bookChapters = countChapters(book);
+        numChapters += bookChapters;
+        if (bookChapters > maxChaptersCount) {
+            maxChaptersCount = bookChapters;
+            maxChaptersBook = book;
+        }
+    });
+    let maxVerse = bible[0];
+    let countBytes = 0;
+    let countWords = 0;
+    let words = new Set();
+    let punctuation = new Set();
+    bible.forEach(x => {
+        if (x.verse > maxVerse.verse) {
+            maxVerse = x;
+        }
+        countBytes += (x.text.length + 1); // add newline
+        const verseWords = x.text.split(/[ \.,;:?()\[\]']/)
+            .filter(x => x.match(/[a-zA-Z]/) != null);
+        verseWords.forEach(word => {
+            if (word != 's' && word != 'S') {
+                words.add(word.toLowerCase());
+                ++countWords;
+            }
+        });
+        for (let i = 0; i < x.text.length; ++i) {
+            const ch = x.text.charAt(i);
+            const c = x.text.charCodeAt(i);
+            if (ch == '-' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == ' ')
+                continue; // words
+            if (ch == '[' || ch == ']' || ch == '#')
+                continue; // editor's marks and paragraph
+            punctuation.add(ch);
+        }
+    });
+    let longestWord = '';
+    words.forEach((word) => {
+        if (word.length > longestWord.length)
+            longestWord = word;
+    });
+    cbm.out('BIBLE KJV 1611\r');
+    cbm.newLine();
+    cbm.out(`${numBooks} books\r`);
+    cbm.out(`${numChapters} total chapters\r`);
+    cbm.out(`${numVerses} total verses\r`);
+    cbm.out(`${countBytes} total bytes of text\r`);
+    cbm.out(`${countWords} total words\r`);
+    cbm.out(`${words.size} distinct words\r`);
+    cbm.newLine();
+    cbm.out(`${maxChaptersBook} has ${maxChaptersCount} chapters\r`);
+    cbm.out(`${maxVerse.book} ${maxVerse.chapter} has ${maxVerse.verse} verses\r`);
+    cbm.out(`longest word is ${longestWord}\r`);
+    const unicorns = findText('unicorn');
+    cbm.out(`unicorn: ${unicorns.length}\r`);
+    const dragons = findText('dragon');
+    cbm.out(`dragon: ${dragons.length}\r`);
+    const satans = findText('satan');
+    cbm.out(`satan: ${satans.length}\r`);
+    const loves = findText('love');
+    cbm.out(`love: ${loves.length}\r`);
+    const sufferings = findText('suffering');
+    cbm.out(`suffering: ${sufferings.length}\r`);
+    const jesus = findText('Jesus', true, true);
+    cbm.out(`Jesus: ${jesus.length}\r`);
+    const abrahams = findText('Abraham', true, true);
+    cbm.out(`Abraham: ${abrahams.length}\r`);
+    const God = findText('God', true, true);
+    cbm.out(`God [word, case]: ${God.length}\r`);
+    const godCase = findText('god', false, true);
+    cbm.out(`god [case]: ${godCase.length}\r`);
+    const godWord = findText('god', true, false);
+    cbm.out(`god [word]: ${godWord.length}\r`);
+    const god = findText('god');
+    cbm.out(`god: ${god.length}\r`);
+    cbm.out('punctuation:');
+    punctuation.forEach((ch) => cbm.out(ch));
+    cbm.newLine();
+    // const apos = findText("'");
+    // apos.forEach(x => {
+    //   const text = x.text.toLocaleLowerCase();
+    //   if (!text.includes("'s") && !text.includes("s'"))
+    //     console.log(JSON.stringify(x))
+    // });
+    // const dash = findText("-");
+    // dash.forEach(x => {
+    //   console.log(JSON.stringify(x))
+    // });
+    // const dashWords: string[] = [];
+    // words.forEach((word: string) => {
+    //   if (word.includes('-'))
+    //     dashWords.push(word);
+    // });
+    // dashWords.sort((a: string, b: string) => {
+    //   if (a == b) return 0;
+    //   if (a > b) return 1;
+    //   return -1;
+    // }).forEach(x => console.log(x));
+    cbm.locate(cbm.getWidth() / 8 - 7, cbm.getHeight() / 8 - 3);
+    const back = cbm.addButton("Back");
+    back.onclick = () => setTimeout(() => aboutBible(), 250);
 };
 //# sourceMappingURL=bible-access.js.map
