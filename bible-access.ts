@@ -46,7 +46,7 @@ function countVerses(book: string, chapter: string) {
   return bible.filter(x => x.book == book && x.chapter == chapter).length;
 }
 
-function findText(text: string, wholeWord: boolean = false, matchCase: boolean = false) {  
+function findText(text: string, wholeWord: boolean = false, matchCase: boolean = false) {
   if (!matchCase)
     text = text.toLowerCase();
   let matches = bible.filter(x => (matchCase ? x.text : x.text.toLowerCase()).includes(text));
@@ -77,6 +77,7 @@ var scale = '';
 var quiet: boolean = false;
 
 const bibleUI = function() {
+  cbm.lowercase = true;
   cbm.hideCursor();
   cbm.underline(6);
   let params = new URLSearchParams(window.location.search);
@@ -90,7 +91,7 @@ const bibleUI = function() {
   let book = params.get('book');
   let chapter = params.get('chapter');
   let verse = params.get('verse');
-  let word = params.get('word');  
+  let word = params.get('word');
   if (button == 'stats')
     bibleStats();
   else if (word != null) {
@@ -122,7 +123,7 @@ const booksUI = function() {
   cbm.out('Old Testament:');
   cbm.newLine();
   const books = getBooks();
-  const cols = cbm.getWidth()/8;
+  const cols = cbm.getCols();
   let col = 0;
   books.forEach(book => {
     if (book.length + col >= cols) {
@@ -163,7 +164,7 @@ const bookUI = function(book: string) {
   cbm.newLine();
   cbm.out("CHAPTERS");
   cbm.newLine();
-  const cols = cbm.getWidth()/8;
+  const cols = cbm.getCols();
   let col = 0;
   let numChapters = countChapters(book);
   for (let i=1; i<=numChapters; ++i) {
@@ -198,7 +199,7 @@ const chapterUI = function(book: string, chapter: string) {
   cbm.newLine();
   cbm.out("VERSES");
   cbm.newLine();
-  const cols = cbm.getWidth()/8;
+  const cols = cbm.getCols();
   let col = 0;
   let numVerses = countVerses(book, chapter);
   for (let i=1; i<=numVerses; ++i) {
@@ -263,7 +264,7 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
   }
   cbm.newLine();
   cbm.newLine();
-  const cols = cbm.getWidth()/8;
+  const cols = cbm.getCols();
   let col = 0;
   const text = entry.text.replace(/[\[\]#]/g, '')
   text.split(' ').forEach(word => {
@@ -381,12 +382,12 @@ const aboutBible = function() {
 
 const addNavigationHelp = function(message: string, homefn:() => void)
 {
-  cbm.locate(0, cbm.getHeight()/8-1);
+  cbm.locate(0, cbm.getRows()-1);
   cbm.foreground(15);
   cbm.reverse = true;
   if (quiet) {
     const help = cbm.addLink('?', null);
-    help.onclick = () => setTimeout( () => { 
+    help.onclick = () => setTimeout( () => {
       if (quiet) {
         quiet = false;
         scale = scale.substring(0, scale.length-2);
@@ -424,7 +425,7 @@ const bibleStats = function() {
     if (bookChapters > maxChaptersCount) {
       maxChaptersCount = bookChapters;
       maxChaptersBook = book;
-    }    
+    }
   });
   let maxVerse = bible[0];
   let countBytes = 0;
@@ -541,13 +542,14 @@ const bibleStats = function() {
   cbm.out('punctuation:');
   punctuation.forEach((ch: string) => cbm.out(ch));
   cbm.newLine();
-  
-  cbm.locate(cbm.getWidth()/8-7, cbm.getHeight()/8-3);
+
+  cbm.locate(cbm.getCols()-7, cbm.getRows()-3);
   const back = cbm.addButton("Back");
   back.onclick = () => setTimeout(() => aboutBible(), 250);
 }
 
-const wordUI = function(word: string, entry: any, wholeWord = false, exactCase = false) {
+const wordUI = function(word: string, entry: any, wholeWord = false, exactCase = false, page = 1) {
+  cbm.lowercase = true;
   cbm.removeButtons();
   cbm.foreground(1);
   cbm.clear();
@@ -562,11 +564,6 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
     word = word.substring(0, word.length-1); // remove punctuation
   }
 
-  if (entry == null)
-    history.replaceState(null, '', `?word=${word}${scale}`);
-  else
-    history.replaceState(null, '', `?word=${word}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
-
   cbm.out(`Search: ${word} `);
   let options = { 'word': wholeWord, 'case': exactCase };
   cbm.newLine();
@@ -575,7 +572,19 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
   buildCheckboxControl('case', options, 'case');
 
   const results = findText(word, options.word, options.case);
+  const perPage = cbm.getRows()-2;
+  const totalPages = Math.floor((results.length + perPage - 1) / perPage);
+
+  if (page > totalPages)
+    page = totalPages;
+
+  if (entry == null)
+    history.replaceState(null, '', `?word=${word}&page=${page}${scale}`);
+  else
+    history.replaceState(null, '', `?word=${word}&page=${page}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
+
   cbm.out(` ${results.length} matches `);
+
   cbm.addLink('<', null)
     .onclick = () => setTimeout(() => {
       if (entry != null)
@@ -583,20 +592,41 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
       else
         bibleUI();
     }, 250);
+  cbm.out(' ');
+  cbm.lowercase = false;
+
+  if (page > 1) {
+    cbm.reverse = true;
+    cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
+      .onclick = () => setTimeout(() => wordUI(word, entry, wholeWord, exactCase, page-1), 250);
+    cbm.reverse = false;
+  }
+  else
+    cbm.out('  ');
+
+  cbm.out(' ');
+
+  if (page < totalPages) {
+    cbm.addLink(cbm.chr$(0x7F)+cbm.chr$(0xA9), null)
+      .onclick = () => setTimeout(() => wordUI(word, entry, wholeWord, exactCase, page+1), 250);
+  }
+
   cbm.newLine();
+  cbm.lowercase = true;
 
   const rows = cbm.getRows();
   const cols = cbm.getCols();
   let row = 2;
 
-  for (i=0; i<results.length && i<rows-2; ++i) {
+  for (i=(page-1)*perPage; i<results.length && i<page*perPage; ++i) {
     const entry = results[i];
-    const text = entry.text.replace(/[\[\]#]/g, '')
+    let text = entry.text.replace('# ', '');
+    text = text.replace(/[\[\]#]/g, '')
     let line = `${entry.book} ${entry.chapter}:${entry.verse} ${text}`;
     if (line.length > cols)
       line = line.substring(0, cols-4) + "...";
     const link = cbm.addLink(line, null);
-    if (line.length < cols && i<rows-3)
+    if (line.length < cols && i<page*perPage-1)
       cbm.newLine();
     link.onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
   }
