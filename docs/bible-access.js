@@ -461,26 +461,6 @@ const bibleStats = function () {
     cbm.out('punctuation:');
     punctuation.forEach((ch) => cbm.out(ch));
     cbm.newLine();
-    // const apos = findText("'");
-    // apos.forEach(x => {
-    //   const text = x.text.toLocaleLowerCase();
-    //   if (!text.includes("'s") && !text.includes("s'"))
-    //     console.log(JSON.stringify(x))
-    // });
-    // const dash = findText("-");
-    // dash.forEach(x => {
-    //   console.log(JSON.stringify(x))
-    // });
-    // const dashWords: string[] = [];
-    // words.forEach((word: string) => {
-    //   if (word.includes('-'))
-    //     dashWords.push(word);
-    // });
-    // dashWords.sort((a: string, b: string) => {
-    //   if (a == b) return 0;
-    //   if (a > b) return 1;
-    //   return -1;
-    // }).forEach(x => console.log(x));
     cbm.locate(cbm.getWidth() / 8 - 7, cbm.getHeight() / 8 - 3);
     const back = cbm.addButton("Back");
     back.onclick = () => setTimeout(() => aboutBible(), 250);
