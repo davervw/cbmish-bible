@@ -93,14 +93,17 @@ const bibleUI = function() {
   let word = params.get('word');  
   if (button == 'stats')
     bibleStats();
-  else if (book == null)
+  else if (word != null) {
+    if (book != null && chapter != null && verse != null)
+      wordUI(word, findVerse(book, chapter, verse));
+    else
+      wordUI(word, null);
+  } else if (book == null)
     booksUI();
   else if (chapter == null)
     bookUI(book);
   else if (verse == null)
     chapterUI(book, chapter);
-  else if (word != null)
-    wordUI(word, findVerse(book, chapter, verse));
   else
     verseUI(book, chapter, verse);
 }
