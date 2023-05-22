@@ -59,18 +59,6 @@ function findText(text: string, wholeWord: boolean = false, matchCase: boolean =
   return matches;
 }
 
-function findLongestText(): any {
-  let longestVerse = null;
-  let longestLength = 0;
-  bible.forEach(x => {
-    if (x.text.length > longestLength) {
-      longestLength = x.text.length;
-      longestVerse = x;
-    }
-  });
-  return longestVerse;
-}
-
 ////////////////////////////////////////////////////////////////////////
 
 var scale = '';
@@ -186,33 +174,36 @@ const bookUI = function(book: string) {
   addNavigationHelp("[Click book name, or #s to navigate]", () => bookUI(book));
 }
 
-const chapterUI = function(book: string, chapter: string) {
-  history.replaceState(null, '', `?book=${book}&chapter=${chapter}${scale}`);
+const chapterUI = function(book: string, chapter: string, page = 1) {
   cbm.removeButtons();
   cbm.clear();
-  const goBooks = cbm.addLink(book, null);
-  goBooks.onclick = () => setTimeout( () => { booksUI(); }, 250);
+  cbm.lowercase = true;
+  cbm.addLink(book, null)
+    .onclick = () => setTimeout( () => { booksUI(); }, 250);
   cbm.out(' ');
-  const goChapters = cbm.addLink(chapter, null);
-  goChapters.onclick = () => setTimeout( () => { bookUI(book); }, 250);
+  cbm.addLink(chapter, null)
+    .onclick = () => setTimeout( () => { bookUI(book); }, 250);
   cbm.newLine();
   cbm.newLine();
   cbm.out("VERSES");
   cbm.newLine();
   const cols = cbm.getCols();
+  const rows = cbm.getRows();
   let col = 0;
+  let row = 3;
   let numVerses = countVerses(book, chapter);
   for (let i=1; i<=numVerses; ++i) {
     const verse = i.toString();
     if (verse.length + col >= cols) {
       cbm.newLine();
+      ++row;
       col = 0;
     }
-    const link = cbm.addLink(verse, null);
-    link.onclick = () => setTimeout( () => {
-      const entry = verseUI(book, chapter, verse);
-      history.pushState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}${scale}`);
-    }, 250);
+    cbm.addLink(verse, null)
+      .onclick = () => setTimeout( () => {
+        const entry = verseUI(book, chapter, verse);
+        history.pushState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}${scale}`);
+      }, 250);
     col += verse.length;
     if (col < cols) {
       cbm.out(' ');
@@ -221,6 +212,121 @@ const chapterUI = function(book: string, chapter: string) {
     if (col == cols)
       col = 0;
   }
+
+  let text = "";
+  bible.filter(x => x.book == book && x.chapter == chapter)
+    .forEach(x => {
+      text += x.verse + " " + x.text.replace(/[\[\]]/g, '') + " ";
+    });
+  col = 0;
+  let line = "";
+  let lines = [];
+  text.split(' ').forEach(word => {
+    if (word == '#' || col + word.length > cols) {
+      const i = line.substring(0, line.length-1).lastIndexOf(' ');
+      let lastWord = line.substring(i+1);
+      if (lastWord.length > 0 && !(lastWord.charAt(0) >= '1' && lastWord.charAt(0) <= '9'))
+        lastWord = "";
+      else
+        line = line.substring(0, i);
+      if (line.length > 0)
+        lines.push(line);
+      col = lastWord.length;
+      line = lastWord;
+      if (word == '#') {
+        line = '  ' + line;
+        col += 2;
+        word = '';
+      }
+    }
+    if (word.length > 0) {
+      line += word;
+      col += word.length;
+      if (col < cols) {
+        ++col;
+        line += ' ';
+      }
+    }
+  });
+  if (line.length > 0)
+    lines.push(line);
+
+  cbm.newLine();
+  cbm.newLine();
+  row += 2;
+
+  const overheadRowsPage1 = row+1;
+  const overheadRowsPage2 = 3;
+  let totalPages = 1;
+  if (overheadRowsPage1 + lines.length >= rows) {
+    let linesRemaining = (lines.length - (rows - overheadRowsPage1));
+    totalPages += Math.floor( (linesRemaining + (rows - overheadRowsPage2 - 1)) / (rows - overheadRowsPage2));
+  }
+
+  if (page > totalPages)
+    page = totalPages;
+
+  history.replaceState(null, '', `?book=${book}&chapter=${chapter}&page=${page}${scale}`);
+
+  const perPage1 = rows - overheadRowsPage1;
+  const perPage2 = rows - overheadRowsPage2;
+  const startIndex = (page == 1) ? 0 : perPage1 + (page-2)*perPage2;
+  const limitIndex = (page == 1) ? perPage1 : startIndex + perPage2;
+
+  if (page > 1) {
+    cbm.removeButtons();
+    cbm.clear();
+    cbm.addLink(book, null)
+      .onclick = () => setTimeout( () => { booksUI(); }, 250);
+    cbm.out(' ');
+    cbm.addLink(chapter, null)
+      .onclick = () => setTimeout( () => { bookUI(book); }, 250);
+    cbm.newLine();
+    cbm.newLine();
+  }
+
+  let verse = "0";
+  col = 0;
+  for (let i=startIndex; i < lines.length && i < limitIndex; ++i) {
+    lines[i].split(' ').forEach((word: string) => {
+      if (word.length > 0 && word[0] >= '1' && word[0] <= '9') {
+        verse = word;
+        cbm.foreground(3);
+        cbm.addLink(word, null)
+          .onclick = () => setTimeout(() => verseUI(book, chapter, word), 250);
+      } else if (word.length > 0) {        
+        cbm.foreground(1);
+        cbm.addLink(word, null)
+          .onclick = () => setTimeout(() => wordUI(word, findVerse(book, chapter, verse)), 250);
+      }
+      col += word.length;
+      if (col < cols) {
+        cbm.out(' ');
+        ++col;
+      }
+    });
+    if (col < cols)
+      cbm.newLine();
+    col = 0;
+    ++row;
+  }
+
+  cbm.lowercase = false;
+  if (page > 1) {
+    cbm.locate(35, 0);
+    cbm.reverse = true;
+    cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
+      .onclick = () => setTimeout(() => chapterUI(book, chapter, page-1), 250);
+    cbm.reverse = false;
+  }
+
+  if (page < totalPages) {
+    cbm.locate(38, 0);
+    cbm.addLink(cbm.chr$(0x7F)+cbm.chr$(0xA9), null)
+      .onclick = () => setTimeout(() => chapterUI(book, chapter, page+1), 250);
+  }
+  cbm.lowercase = true;
+
   addNavigationHelp("[Click book name, or #s to navigate]", () => chapterUI(book, chapter));
 }
 
@@ -481,12 +587,25 @@ const bibleStats = function() {
   cbm.addLink(`${maxVerse.book} ${maxVerse.chapter} has ${maxVerse.verse} verses`, null)
     .onclick = () => setTimeout(() => chapterUI(maxVerse.book, maxVerse.chapter), 250);
   cbm.newLine();
-  cbm.addLink(`longest word is ${longestWord}\r`, null)
-    .onclick = () => setTimeout(() => wordUI(longestWord, null), 250);
+
+  let longestVerse = null;
+  bible.forEach(x => {
+    if (longestVerse == null || x.text.length > longestVerse.text.length)
+      longestVerse = x;
+  });
+  cbm.addLink(`longest verse: ${longestVerse.book} ${longestVerse.chapter}:${longestVerse.verse}`, null)
+    .onclick = () => setTimeout(() => {
+      verseUI(longestVerse.book, longestVerse.chapter, longestVerse.verse);
+    }, 250);
+  cbm.newLine();
 
   const unicorns = findText('unicorn');
   cbm.addLink(`unicorn: ${unicorns.length}`, null)
     .onclick = () => setTimeout(() => wordUI('unicorn', null), 250);
+  cbm.newLine();
+
+  cbm.addLink(`longest word is ${longestWord}`, null)
+    .onclick = () => setTimeout(() => wordUI(longestWord, null), 250);
   cbm.newLine();
 
   const dragons = findText('dragon');
@@ -521,22 +640,12 @@ const bibleStats = function() {
 
   const God = findText('God', true, true);
   cbm.addLink(`God [word, case]: ${God.length}`, null)
-  .onclick = () => setTimeout(() => wordUI('God', null, true, true), 250);
-  cbm.newLine();
-
-  const godCase = findText('god', false, true);
-  cbm.addLink(`god [case]: ${godCase.length}`, null)
-  .onclick = () => setTimeout(() => wordUI('god', null, false, true), 250);
-  cbm.newLine();
-
-  const godWord = findText('god', true, false);
-  cbm.addLink(`god [word]: ${godWord.length}`, null)
-  .onclick = () => setTimeout(() => wordUI('god', null, true, false), 250);
+    .onclick = () => setTimeout(() => wordUI('God', null, true, true), 250);
   cbm.newLine();
 
   const god = findText('god');
   cbm.addLink(`god: ${god.length}`, null)
-  .onclick = () => setTimeout(() => wordUI('god', null), 250);
+    .onclick = () => setTimeout(() => wordUI('god', null), 250);
   cbm.newLine();
 
   cbm.out('punctuation:');
