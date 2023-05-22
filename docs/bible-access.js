@@ -195,8 +195,10 @@ const chapterUI = function (book, chapter, page = 1) {
             cbm.out(' ');
             ++col;
         }
-        if (col == cols)
+        if (col == cols) {
             col = 0;
+            ++row;
+        }
     }
     let text = "";
     bible.filter(x => x.book == book && x.chapter == chapter)

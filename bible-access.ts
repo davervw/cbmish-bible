@@ -209,8 +209,10 @@ const chapterUI = function(book: string, chapter: string, page = 1) {
       cbm.out(' ');
       ++col;
     }
-    if (col == cols)
+    if (col == cols) {
       col = 0;
+      ++row;
+    }
   }
 
   let text = "";
