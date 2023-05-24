@@ -69,11 +69,12 @@ const bibleUI = function () {
     let chapter = params.get('chapter');
     let verse = params.get('verse');
     let word = params.get('word');
+    let page = params.get('page');
     if (button == 'stats')
         bibleStats();
     else if (word != null) {
         if (book != null && chapter != null && verse != null)
-            wordUI(word, findVerse(book, chapter, verse));
+            wordUI(word, findVerse(book, chapter, verse), false, false, (page == null) ? 1 : Number(page));
         else
             wordUI(word, null);
     }
@@ -82,7 +83,7 @@ const bibleUI = function () {
     else if (chapter == null)
         bookUI(book);
     else if (verse == null)
-        chapterUI(book, chapter);
+        chapterUI(book, chapter, (page == null) ? 1 : Number(page));
     else
         verseUI(book, chapter, verse);
 };
@@ -247,6 +248,9 @@ const chapterUI = function (book, chapter, page = 1) {
         let linesRemaining = (lines.length - (rows - overheadRowsPage1));
         totalPages += Math.floor((linesRemaining + (rows - overheadRowsPage2 - 1)) / (rows - overheadRowsPage2));
     }
+    page = Math.floor(page);
+    if (page < 1)
+        page = 1;
     if (page > totalPages)
         page = totalPages;
     history.replaceState(null, '', `?book=${book}&chapter=${chapter}&page=${page}${scale}`);
@@ -634,6 +638,9 @@ const wordUI = function (word, entry, wholeWord = false, exactCase = false, page
     const results = findText(word, options.word, options.case);
     const perPage = cbm.getRows() - 2;
     const totalPages = Math.floor((results.length + perPage - 1) / perPage);
+    page = Math.floor(page);
+    if (page < 1)
+        page = 1;
     if (page > totalPages)
         page = totalPages;
     if (entry == null)
