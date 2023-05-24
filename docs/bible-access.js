@@ -215,8 +215,10 @@ const chapterUI = function (book, chapter, page = 1) {
             let lastWord = line.substring(i + 1);
             if (lastWord.length > 0 && !(lastWord.charAt(0) >= '1' && lastWord.charAt(0) <= '9'))
                 lastWord = "";
-            else
+            else {
                 line = line.substring(0, i);
+                lastWord += ' ';
+            }
             if (line.length > 0)
                 lines.push(line);
             col = lastWord.length;
