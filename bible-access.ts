@@ -104,8 +104,8 @@ const booksUI = function() {
   cbm.clear();
   cbm.underline(6);
   cbm.foreground(3);
-  const about = cbm.addLink('BIBLE', null);
-  about.onclick = () => setTimeout( () => { aboutBible(); }, 250);
+  cbm.addLink('BIBLE', null)
+    .onclick = () => setTimeout( () => { aboutBible(); }, 250);
   cbm.newLine();
   cbm.newLine();
   cbm.foreground(15);
@@ -130,8 +130,8 @@ const booksUI = function() {
       cbm.out('New Testament:');
       cbm.newLine();
     }
-    const link = cbm.addLink(book, null);
-    link.onclick = () => setTimeout( () => { bookUI(book); }, 250);
+    cbm.addLink(book, null)  
+      .onclick = () => setTimeout( () => { bookUI(book); }, 250);
     col += book.length;
     if (col < cols) {
       cbm.out(' ');
@@ -147,8 +147,8 @@ const bookUI = function(book: string) {
   history.replaceState(null, '', `?book=${book}${scale}`);
   cbm.removeButtons();
   cbm.clear();
-  const back = cbm.addLink(book, null);
-  back.onclick = () => setTimeout( () => { booksUI(); }, 250);
+  cbm.addLink(book, null)
+    .onclick = () => setTimeout( () => { booksUI(); }, 250);
   cbm.newLine();
   cbm.newLine();
   cbm.out("CHAPTERS");
@@ -162,8 +162,8 @@ const bookUI = function(book: string) {
       cbm.newLine();
       col = 0;
     }
-    const link = cbm.addLink(chapter, null);
-    link.onclick = () => setTimeout( () => { chapterUI(book, chapter); }, 250);
+    cbm.addLink(chapter, null)
+      .onclick = () => setTimeout( () => { chapterUI(book, chapter); }, 250);
     col += chapter.length;
     if (col < cols) {
       cbm.out(' ');
@@ -339,6 +339,7 @@ const chapterUI = function(book: string, chapter: string, page = 1) {
 }
 
 const verseUI = function(book: string, chapter: string, verse: string): any {
+  cbm.lowercase = true;
   cbm.foreground(1);
   cbm.removeButtons();
   cbm.clear();
@@ -346,37 +347,29 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
   if (entry == null)
     return entry;
   history.replaceState(entry, '', `?book=${book}&chapter=${chapter}&verse=${verse}${scale}`);
-  {
-    const link = cbm.addLink('<', null);
-    link.onclick = () => setTimeout( () => { versePreviousUI(book, chapter, verse); }, 250);
-  }
+
+  cbm.addLink(entry.book, null)
+    .onclick = () => setTimeout( () => {booksUI()}, 250);
+
   cbm.out(' ');
-  {
-    const link = cbm.addLink('>', null);
-    link.onclick = () => setTimeout( () => { verseNextUI(book, chapter, verse); }, 250);
-  }
-  cbm.out(' ');
-  {
-    const link = cbm.addLink(entry.book, null);
-    link.onclick = () => setTimeout( () => {
-      booksUI();
-    }, 250);
-  }
-  cbm.out(' ');
-  {
-    const link = cbm.addLink(entry.chapter, null);
-    link.onclick = () => setTimeout( () => {
-      bookUI(entry.book);
-    }, 250);
-  }
+  cbm.addLink(entry.chapter, null)
+    .onclick = () => setTimeout( () => {bookUI(entry.book);}, 250);
+
   cbm.out(':');
-  {
-    const link = cbm.addLink(entry.verse, null);
-    link.onclick = () => setTimeout( () => {
-      chapterUI(entry.book, entry.chapter);
-    }, 250);
-  }
-  cbm.newLine();
+  cbm.addLink(entry.verse, null)
+    .onclick = () => setTimeout( () => {chapterUI(entry.book, entry.chapter);}, 250);
+
+  cbm.lowercase = false;
+  cbm.locate(35, 0);
+  cbm.reverse = true;
+  cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
+    .onclick = () => setTimeout( () => { versePreviousUI(book, chapter, verse); }, 250);
+  cbm.reverse = false;
+  cbm.out(' ');
+  cbm.addLink(cbm.chr$(0x7F)+cbm.chr$(0xA9), null)
+    .onclick = () => setTimeout( () => { verseNextUI(book, chapter, verse); }, 250);
+  cbm.lowercase = true;
+
   cbm.newLine();
   const cols = cbm.getCols();
   let col = 0;
@@ -387,8 +380,8 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
         cbm.newLine();
         col = 0;
       }
-      const link = cbm.addLink(word, null);
-      link.onclick = () => setTimeout(() => { wordUI(word, entry); }, 250);
+      cbm.addLink(word, null)
+        .onclick = () => setTimeout(() => { wordUI(word, entry); }, 250);
       col += word.length;
       if (col < cols) {
         cbm.out(' ');
@@ -463,12 +456,12 @@ const aboutBible = function() {
   cbm.foreground(3);
   cbm.out("BIBLE ");
   cbm.foreground(15);
-  const link1 = cbm.addLink("github.com/davervw/cbmish-bible", "https://github.com/davervw/cbmish-bible");
+  cbm.addLink("github.com/davervw/cbmish-bible", "https://github.com/davervw/cbmish-bible");
   cbm.newLine();
   cbm.foreground(3);
   cbm.out("cbm-ish ");
   cbm.foreground(15);
-  const link2 = cbm.addLink("github.com/davervw/cbmish-script", "https://github.com/davervw/cbmish-script");
+  cbm.addLink("github.com/davervw/cbmish-script", "https://github.com/davervw/cbmish-script");
   cbm.newLine();
   cbm.newLine();
   let row = 0;
@@ -500,25 +493,25 @@ const addNavigationHelp = function(message: string, homefn:() => void)
   cbm.foreground(15);
   cbm.reverse = true;
   if (quiet) {
-    const help = cbm.addLink('?', null);
-    help.onclick = () => setTimeout( () => {
-      if (quiet) {
-        quiet = false;
-        scale = scale.substring(0, scale.length-2);
-        homefn();
-      }
-    }, 250);
+    cbm.addLink('?', null)
+      .onclick = () => setTimeout( () => {
+        if (quiet) {
+          quiet = false;
+          scale = scale.substring(0, scale.length-2);
+          homefn();
+        }
+      }, 250);
   } else {
-    const unhelp = cbm.addLink('-', null);
-    unhelp.onclick = () => setTimeout( () => {
-      if (!quiet) {
-        quiet = true;
-        scale += '&q';
-        homefn();
-      }
-    }, 250);
-    cbm.out(message);
-  }
+    cbm.addLink('-', null)
+      .onclick = () => setTimeout( () => {
+        if (!quiet) {
+          quiet = true;
+          scale += '&q';
+          homefn();
+        }
+      }, 250);
+      cbm.out(message);
+    }
   cbm.reverse = false;
   cbm.foreground(1);
 }
@@ -703,17 +696,24 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
   else
     history.replaceState(null, '', `?word=${word}&page=${page}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
 
-  cbm.out(` ${results.length} matches `);
+  cbm.out(` ${results.length} matches`);
 
-  cbm.addLink('<', null)
+  let saveRow = 0;
+  let saveCol = 0;
+  [saveRow, saveCol] = cbm.locate(0, 0);
+  cbm.locate(33, saveRow);  
+
+  cbm.lowercase = false;
+  cbm.up();
+  cbm.addLink(cbm.chr$(95), null)
     .onclick = () => setTimeout(() => {
       if (entry != null)
         verseUI(entry.book, entry.chapter, entry.verse);
       else
         bibleUI();
     }, 250);
+
   cbm.out(' ');
-  cbm.lowercase = false;
 
   if (page > 1) {
     cbm.reverse = true;
@@ -731,7 +731,7 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
       .onclick = () => setTimeout(() => wordUI(word, entry, wholeWord, exactCase, page+1), 250);
   }
 
-  cbm.newLine();
+  cbm.locate(0, 2);
   cbm.lowercase = true;
 
   const rows = cbm.getRows();
@@ -745,18 +745,16 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
     let line = `${entry.book} ${entry.chapter}:${entry.verse} ${text}`;
     if (line.length > cols)
       line = line.substring(0, cols-4) + "...";
-    const link = cbm.addLink(line, null);
+    cbm.addLink(line, null)
+      .onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
     if (line.length < cols && i<page*perPage-1)
       cbm.newLine();
-    link.onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
   }
 }
 
 const buildCheckboxControl = function(text: string, options: any, field: string) {
   let flag = false;
   let label = `[${flag?'X':' '}] ${text}`
-  const link = cbm.addLink(label, null);
-  link.onclick = () => {
-    flag = !flag;
-  }
+  cbm.addLink(label, null)
+    .onclick = () => { flag = !flag; }
 }
