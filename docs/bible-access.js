@@ -543,7 +543,7 @@ const bibleStats = function () {
             longestWord = word;
     });
     cbm.underline(6);
-    cbm.addLink('BIBLE KJV 1611', 'https://en.wikipedia.org/wiki/King_James_Version');
+    cbm.addLink('BIBLE KJV', 'https://en.wikipedia.org/wiki/King_James_Version');
     cbm.newLine();
     cbm.newLine();
     cbm.addLink(`${numBooks} books`, null)
