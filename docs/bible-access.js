@@ -160,6 +160,16 @@ const bookUI = function (book) {
             col = 0;
     }
     addNavigationHelp("[Click book name, or #s to navigate]", () => bookUI(book));
+    cbm.lowercase = false;
+    cbm.locate(35, 0);
+    cbm.reverse = true;
+    cbm.addLink(cbm.chr$(0xA9) + cbm.chr$(0x7F), null)
+        .onclick = () => setTimeout(() => bookUI(prevBook(book)), 250);
+    cbm.reverse = false;
+    cbm.out(' ');
+    cbm.addLink(cbm.chr$(0x7F) + cbm.chr$(0xA9), null)
+        .onclick = () => setTimeout(() => bookUI(nextBook(book)), 250);
+    cbm.lowercase = true;
 };
 const chapterUI = function (book, chapter, page = 1) {
     cbm.removeButtons();
