@@ -703,9 +703,7 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
     word = word.substring(0, word.length-1); // remove punctuation
   }
 
-  cbm.out(`Search: ${word} `);
   let options = { 'word': wholeWord, 'case': exactCase };
-  cbm.newLine();
   buildCheckboxControl('word', options, 'word');
   cbm.out(' ');
   buildCheckboxControl('case', options, 'case');
@@ -713,6 +711,15 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
   const results = findText(word, options.word, options.case);
   const perPage = cbm.getRows()-2;
   const totalPages = Math.floor((results.length + perPage - 1) / perPage);
+
+  cbm.out(` ${results.length} matches`);
+  cbm.newLine();
+  cbm.out('Search: ');
+  cbm.underline(3);
+  cbm.underlined = true;
+  cbm.out(word.padEnd(32));
+  cbm.underline(6);
+  cbm.left();
 
   page = Math.floor(page);
   if (page < 1)
@@ -724,8 +731,6 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
     history.replaceState(null, '', `?word=${word}&page=${page}${scale}`);
   else
     history.replaceState(null, '', `?word=${word}&page=${page}&book=${entry.book}&chapter=${entry.chapter}&verse=${entry.verse}${scale}`);
-
-  cbm.out(` ${results.length} matches`);
 
   let saveRow = 0;
   let saveCol = 0;
@@ -770,7 +775,7 @@ const wordUI = function(word: string, entry: any, wholeWord = false, exactCase =
     let text = entry.text.replace('# ', '');
     text = text.replace(/[\[\]#]/g, '')
     let line = `${entry.book} ${entry.chapter}:${entry.verse} ${text}`;
-    if (line.length > cols)
+    if (line.length >= cols)
       line = line.substring(0, cols-4) + "...";
     cbm.addLink(line, null)
       .onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
