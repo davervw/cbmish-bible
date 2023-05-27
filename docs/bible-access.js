@@ -517,7 +517,6 @@ const bibleStats = function () {
         });
         for (let i = 0; i < x.text.length; ++i) {
             const ch = x.text.charAt(i);
-            const c = x.text.charCodeAt(i);
             if (ch == '-' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == ' ')
                 continue; // words
             if (ch == '[' || ch == ']' || ch == '#')
@@ -667,9 +666,7 @@ const wordUI = function (word, entry, wholeWord = false, exactCase = false, page
     }
     cbm.locate(0, 2);
     cbm.lowercase = true;
-    const rows = cbm.getRows();
     const cols = cbm.getCols();
-    let row = 2;
     for (i = (page - 1) * perPage; i < results.length && i < page * perPage; ++i) {
         const entry = results[i];
         let text = entry.text.replace('# ', '');
