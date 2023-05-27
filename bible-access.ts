@@ -109,6 +109,7 @@ const booksUI = function() {
   cbm.newLine();
   cbm.newLine();
   cbm.foreground(15);
+  cbm.reverse = true;
   cbm.out('Old Testament:');
   cbm.newLine();
   const books = getBooks();
@@ -127,6 +128,7 @@ const booksUI = function() {
         col = 0;
       }
       cbm.newLine();
+      cbm.reverse = true;
       cbm.out('New Testament:');
       cbm.newLine();
     }
@@ -340,7 +342,10 @@ const chapterUI = function(book: string, chapter: string, page = 1) {
     .onclick = () => setTimeout(() => {
       if (page > 1)
         chapterUI(book, chapter, page-1);
-      else {
+      else if (Number(chapter) > 1) {
+        chapter = (Number(chapter)-1).toString();
+        chapterUI(book, chapter, Number.MAX_SAFE_INTEGER);
+      } else {
         book = prevBook(book);
         chapterUI(book, countChapters(book).toString(), Number.MAX_SAFE_INTEGER);
       }
