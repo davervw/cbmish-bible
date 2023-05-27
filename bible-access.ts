@@ -320,20 +320,31 @@ const chapterUI = function(book: string, chapter: string, page = 1) {
   }
 
   cbm.lowercase = false;
-  if (page > 1) {
-    cbm.locate(35, 0);
-    cbm.reverse = true;
-    cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
-      .onclick = () => setTimeout(() => chapterUI(book, chapter, page-1), 250);
-    cbm.reverse = false;
-  }
+  cbm.locate(35, 0);
+  cbm.reverse = true;
+  cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
+    .onclick = () => setTimeout(() => {
+      if (page > 1)
+        chapterUI(book, chapter, page-1);
+      else {
+        book = prevBook(book);
+        chapterUI(book, countChapters(book).toString(), Number.MAX_SAFE_INTEGER);
+      }
+    }, 250);
+  cbm.reverse = false;
 
-  if (page < totalPages) {
-    cbm.locate(38, 0);
-    cbm.addLink(cbm.chr$(0x7F)+cbm.chr$(0xA9), null)
-      .onclick = () => setTimeout(() => chapterUI(book, chapter, page+1), 250);
-  }
-  cbm.lowercase = true;
+  cbm.out(' ');
+
+  const totalChapters = countChapters(book);
+  cbm.addLink(cbm.chr$(0x7F)+cbm.chr$(0xA9), null)
+    .onclick = () => setTimeout(() => {
+      if (page < totalPages)
+        chapterUI(book, chapter, page+1);
+      else if (Number(chapter) < totalChapters)
+        chapterUI(book, (Number(chapter)+1).toString(), 1)
+      else
+        chapterUI(nextBook(book), "1", 1);
+    }, 250);
 
   addNavigationHelp("[Click book name, or #s to navigate]", () => chapterUI(book, chapter));
 }
