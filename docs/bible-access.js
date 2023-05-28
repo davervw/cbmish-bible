@@ -55,8 +55,11 @@ var scale = '';
 var quiet = false;
 var optionWord = false;
 var optionCase = false;
+var cbm = new CbmishConsole();
+cbm.CbmishConsole();
 const bibleUI = function () {
     cbm.lowercase = true;
+    cbm.doubleClickEnabled = false;
     cbm.hideCursor();
     cbm.underline(6);
     let params = new URLSearchParams(window.location.search);
@@ -352,6 +355,7 @@ const chapterUI = function (book, chapter, page = 1) {
 const verseUI = function (book, chapter, verse) {
     cbm.lowercase = true;
     cbm.foreground(1);
+    cbm.underline(6);
     cbm.removeButtons();
     cbm.clear();
     const entry = findVerse(book, chapter, verse);
@@ -644,6 +648,7 @@ const wordUI = function (word, entry, setOptionWord = false, setOptionCase = fal
     cbm.lowercase = true;
     cbm.removeButtons();
     cbm.foreground(1);
+    cbm.underline(6);
     cbm.clear();
     optionWord = setOptionWord;
     optionCase = setOptionCase;
@@ -666,9 +671,8 @@ const wordUI = function (word, entry, setOptionWord = false, setOptionCase = fal
     cbm.newLine();
     cbm.out('Search: ');
     cbm.underline(3);
-    cbm.underlined = true;
-    cbm.out(word.padEnd(cbm.getCols() - 9));
-    cbm.underline(6);
+    cbm.addLink(word.padEnd(cbm.getCols() - 9), null)
+        .onclick = () => { };
     page = Math.floor(page);
     if (page < 1)
         page = 1;
@@ -682,28 +686,32 @@ const wordUI = function (word, entry, setOptionWord = false, setOptionCase = fal
     let saveCol = 0;
     [saveRow, saveCol] = cbm.locate(0, 0);
     cbm.locate(33, saveRow);
+    cbm.underline(6);
     cbm.lowercase = false;
     cbm.up();
-    cbm.addLink(cbm.chr$(95), null)
-        .onclick = () => setTimeout(() => {
+    const backLink = cbm.addLink(cbm.chr$(95), null);
+    backLink.onclick = () => setTimeout(() => {
         if (entry != null)
             verseUI(entry.book, entry.chapter, entry.verse);
         else
             bibleUI();
     }, 250);
+    backLink.normal = backLink.normal.replace('\x02', '');
     cbm.out(' ');
     if (page > 1) {
         cbm.reverse = true;
-        cbm.addLink(cbm.chr$(0xA9) + cbm.chr$(0x7F), null)
-            .onclick = () => setTimeout(() => wordUI(word, entry, false, false, page - 1), 250);
+        const link = cbm.addLink(cbm.chr$(0xA9) + cbm.chr$(0x7F), null);
+        link.onclick = () => setTimeout(() => wordUI(word, entry, false, false, page - 1), 250);
+        link.normal = link.normal.replace('\x02', '');
         cbm.reverse = false;
     }
     else
         cbm.out('  ');
     cbm.out(' ');
     if (page < totalPages) {
-        cbm.addLink(cbm.chr$(0x7F) + cbm.chr$(0xA9), null)
-            .onclick = () => setTimeout(() => wordUI(word, entry, false, false, page + 1), 250);
+        const link = cbm.addLink(cbm.chr$(0x7F) + cbm.chr$(0xA9), null);
+        link.onclick = () => setTimeout(() => wordUI(word, entry, false, false, page + 1), 250);
+        link.normal = link.normal.replace('\x02', '');
     }
     cbm.locate(0, 2);
     cbm.lowercase = true;
@@ -715,11 +723,13 @@ const wordUI = function (word, entry, setOptionWord = false, setOptionCase = fal
         let line = `${entry.book} ${entry.chapter}:${entry.verse} ${text}`;
         if (line.length >= cols)
             line = line.substring(0, cols - 4) + "...";
-        cbm.addLink(line, null)
-            .onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
+        const link = cbm.addLink(line, null);
+        link.onclick = () => setTimeout(() => verseUI(entry.book, entry.chapter, entry.verse), 250);
+        link.normal = link.normal.replace('\x02', '');
         if (line.length < cols && i < page * perPage - 1)
             cbm.newLine();
     }
+    cbm.underline(3);
 };
 const buildWholeWordControl = function (word, page, entry) {
     let label = `[${optionWord ? 'X' : ' '}] word`;
@@ -728,6 +738,7 @@ const buildWholeWordControl = function (word, page, entry) {
         optionWord = !optionWord;
         wordUI(word, entry, optionWord, optionCase, page);
     }, 250);
+    link.normal = link.normal.replace('\x02', '');
 };
 const buildMatchCaseControl = function (word, page, entry) {
     let label = `[${optionCase ? 'X' : ' '}] case`;
@@ -736,5 +747,8 @@ const buildMatchCaseControl = function (word, page, entry) {
         optionCase = !optionCase;
         wordUI(word, entry, optionWord, optionCase, page);
     }, 250);
+    link.normal = link.normal.replace('\x02', '');
 };
+cbm.addDoubleClickToggleCursorHandler();
+bibleUI();
 //# sourceMappingURL=bible-access.js.map

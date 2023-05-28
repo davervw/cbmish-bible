@@ -2,9 +2,6 @@
 // Copyright (c) 2022-2023 by David R. Van Wagner
 // github.com/davervw/cbmish-script
 // davevw.com
-var cbm = new CbmishConsole();
-cbm.CbmishConsole();
-bibleUI();
 const mainMenu = function () {
     cbm.removeButtons();
     cbm.init();
@@ -210,7 +207,7 @@ const addexit = function () {
         _cbm.escapePressed = true;
         if (cbm.getCols() < 40) {
             cbm.resize();
-            addDoubleClickToggleCursorHandler();
+            cbm.addDoubleClickToggleCursorHandler();
         }
         onleave();
     };
@@ -236,7 +233,7 @@ const addexitMainMenu = function () {
         _cbm.escapePressed = true;
         if (cbm.getCols() < 40) {
             cbm.resize();
-            addDoubleClickToggleCursorHandler();
+            cbm.addDoubleClickToggleCursorHandler();
         }
         onleaveMainMenu();
     };
@@ -666,16 +663,6 @@ const spriteXorWithNumber = function (image, n) {
         throw `expected one or two digit number, not ${n}`;
     return image;
 };
-const addDoubleClickToggleCursorHandler = () => {
-    const consoleElement = document.getElementsByTagName('console')[0];
-    const topCanvas = consoleElement.getElementsByClassName("sprites")[0];
-    topCanvas.addEventListener('dblclick', (event) => toggleBlinkingCursor(), false);
-};
-const toggleBlinkingCursor = function () {
-    const blink = !cbm.hideCursor();
-    if (blink)
-        cbm.blinkCursor();
-};
 const screenVic = () => {
     cbm.font = vic20_char_rom;
     cbm.background(1);
@@ -690,22 +677,22 @@ const screenVic = () => {
     cbm.out("READY.\r");
     cbm.findButton("X").color = 0;
     cbm.redrawButtons();
-    addDoubleClickToggleCursorHandler();
+    cbm.addDoubleClickToggleCursorHandler();
 };
 const screenVdc = () => {
     cbm.init({ background: 0, border: 0, foreground: 3 });
-    addDoubleClickToggleCursorHandler();
+    cbm.addDoubleClickToggleCursorHandler();
 };
 const screenPet = () => {
     cbm.init({ background: 0, border: 0, foreground: 5 });
-    addDoubleClickToggleCursorHandler();
+    cbm.addDoubleClickToggleCursorHandler();
 };
 const screenBig = () => {
     cbm.init({ background: 6, border: 14, foreground: 15 });
     cbm.foreground(1);
     cbm.hideCursor();
     cbm.blinkCursor();
-    addDoubleClickToggleCursorHandler();
+    cbm.addDoubleClickToggleCursorHandler();
 };
 const screenC64 = () => {
     cbm.font = c64_char_rom;
@@ -713,8 +700,8 @@ const screenC64 = () => {
     cbm.foreground(1);
     cbm.hideCursor();
     cbm.blinkCursor();
-    addDoubleClickToggleCursorHandler();
+    cbm.addDoubleClickToggleCursorHandler();
 };
 //mainMenu();
-//addDoubleClickToggleCursorHandler();
+//cbm.addDoubleClickToggleCursorHandler();
 //# sourceMappingURL=sample.js.map

@@ -18,6 +18,7 @@ class CbmishConsole {
         this.lowercase = true;
         this.reverse = false;
         this.underlined = false;
+        this.doubleClickEnabled = true;
         this.cursorBlinking = false;
         this.cursorShown = false;
         this.escapePressed = false;
@@ -1492,6 +1493,19 @@ class CbmishConsole {
     }
     getHeight() {
         return this.rows * 8;
+    }
+    toggleBlinkingCursor(event = null) {
+        if (event != null && !this.doubleClickEnabled)
+            return;
+        const blink = !this.hideCursor();
+        if (blink)
+            this.blinkCursor();
+    }
+    addDoubleClickToggleCursorHandler() {
+        const consoleElement = document.getElementsByTagName('console')[0];
+        const topCanvas = consoleElement.getElementsByClassName("sprites")[0];
+        topCanvas.addEventListener('dblclick', (event) => this.toggleBlinkingCursor(event), false);
+        this.doubleClickEnabled = true;
     }
 }
 //# sourceMappingURL=cbmish.js.map

@@ -18,6 +18,7 @@ class CbmishConsole {
     lowercase: boolean = true;
     reverse: boolean = false;
     underlined: boolean = false;
+    doubleClickEnabled = true;
     private cursorBlinking: boolean = false;
     private cursorShown: boolean = false;
     private cursorSaveColor: number;
@@ -1656,5 +1657,20 @@ class CbmishConsole {
 
     public getHeight() : number {
         return this.rows * 8;
+    }
+
+    public toggleBlinkingCursor(event: any = null) {
+        if (event != null && !this.doubleClickEnabled)
+            return;
+        const blink = !this.hideCursor();
+        if (blink)
+            this.blinkCursor();
+    }
+
+    addDoubleClickToggleCursorHandler() {
+        const consoleElement = document.getElementsByTagName('console')[0];
+        const topCanvas = consoleElement.getElementsByClassName("sprites")[0] as HTMLCanvasElement;
+        topCanvas.addEventListener('dblclick', (event: MouseEvent) => this.toggleBlinkingCursor(event), false);
+        this.doubleClickEnabled = true;
     }
 }
