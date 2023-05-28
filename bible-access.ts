@@ -734,8 +734,8 @@ const wordUI = function(word: string, entry: any, setOptionWord: boolean = false
   cbm.newLine();
   cbm.out('Search: ');
   cbm.underline(3);
-  cbm.addLink(word.padEnd(cbm.getCols()-9), null)
-    .onclick = () => {};
+  const editLink = cbm.addLink(word.padEnd(cbm.getCols()-9), null);
+  editLink.onclick = () => editSearch(editLink, word, page, entry);
 
   page = Math.floor(page);
   if (page < 1)
@@ -804,6 +804,33 @@ const wordUI = function(word: string, entry: any, setOptionWord: boolean = false
       cbm.newLine();
   }
   cbm.underline(3);
+}
+
+const editSearch = function(editLink: any, word: string, page: number, entry: any) {
+  const savedScreen = cbm.saveVideoMemory();
+  const left = editLink.left;
+  const top = editLink.top;
+  cbm.removeButtons();
+  for (let i=0; i<savedScreen.colors.length; ++i)
+    savedScreen.colors[i] = 15;
+  cbm.restoreVideoMemory(savedScreen);
+  cbm.locate(0, top);
+  cbm.foreground(1);
+  cbm.out('Search: ')
+  setTimeout(() => {
+    cbm.locate(left+word.length, top)
+    cbm.blinkCursor();
+    cbm.reverse = true;
+  }, 250);
+
+  // on click go into edit field mode
+  //    blink cursor, position to end of value
+  //    save screen text, remove all links, restore screen text dim gray
+  //    redraw label and field in white
+  //    restrict cursor & text changes to bounds of field
+  //    stop blinking on Return/Enter/Escape
+  //    call onreturn() after Return/Enter with text from bounds
+  //    exit edit mode, restore value if Escape  
 }
 
 const buildWholeWordControl = function(word: string, page: number, entry: any) {

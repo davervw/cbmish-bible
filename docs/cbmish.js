@@ -1507,5 +1507,19 @@ class CbmishConsole {
         topCanvas.addEventListener('dblclick', (event) => this.toggleBlinkingCursor(event), false);
         this.doubleClickEnabled = true;
     }
+    saveVideoMemory() {
+        return { chars: [...this.charCells], colors: [...this.colorCells] };
+    }
+    restoreVideoMemory(video) {
+        let size = this.rows * this.cols;
+        if (video.chars.length != size)
+            throw `expected .chars size ${size}`;
+        if (video.colors.length != size)
+            throw `expected .colors size ${size}`;
+        this.clear();
+        this.colorCells = [...video.colors];
+        for (let i = 0; i < size; ++i)
+            this.pokeScreen(1024 + i, video.chars[i]);
+    }
 }
 //# sourceMappingURL=cbmish.js.map

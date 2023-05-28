@@ -1667,10 +1667,26 @@ class CbmishConsole {
             this.blinkCursor();
     }
 
-    addDoubleClickToggleCursorHandler() {
+    public addDoubleClickToggleCursorHandler() {
         const consoleElement = document.getElementsByTagName('console')[0];
         const topCanvas = consoleElement.getElementsByClassName("sprites")[0] as HTMLCanvasElement;
         topCanvas.addEventListener('dblclick', (event: MouseEvent) => this.toggleBlinkingCursor(event), false);
         this.doubleClickEnabled = true;
+    }
+
+    public saveVideoMemory(): any {
+        return { chars: [...this.charCells], colors: [...this.colorCells] }
+    }
+
+    public restoreVideoMemory(video: any) {
+        let size = this.rows * this.cols;
+        if (video.chars.length != size)
+            throw `expected .chars size ${size}`
+        if (video.colors.length != size)
+            throw `expected .colors size ${size}`
+        this.clear();
+        this.colorCells = [...video.colors];
+        for (let i=0; i<size; ++i)
+            this.pokeScreen(1024+i, video.chars[i]);
     }
 }
