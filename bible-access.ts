@@ -187,7 +187,7 @@ const bookUI = function(book: string) {
   addNavigationHelp("[Click book name, or #s to navigate]", () => bookUI(book));
 
   cbm.lowercase = false;
-  cbm.locate(35, 0);
+  cbm.locate(cbm.getCols()-5, 0);
   cbm.reverse = true;
   cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
     .onclick = () => setTimeout(() => bookUI(prevBook(book)), 250);
@@ -350,7 +350,7 @@ const chapterUI = function(book: string, chapter: string, page = 1) {
   }
 
   cbm.lowercase = false;
-  cbm.locate(35, 0);
+  cbm.locate(cbm.getCols()-5, 0);
   cbm.reverse = true;
   cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
     .onclick = () => setTimeout(() => {
@@ -405,7 +405,7 @@ const verseUI = function(book: string, chapter: string, verse: string): any {
     .onclick = () => setTimeout( () => {chapterUI(entry.book, entry.chapter);}, 250);
 
   cbm.lowercase = false;
-  cbm.locate(35, 0);
+  cbm.locate(cbm.getCols()-5, 0);
   cbm.reverse = true;
   cbm.addLink(cbm.chr$(0xA9)+cbm.chr$(0x7F), null)
     .onclick = () => setTimeout( () => { versePreviousUI(book, chapter, verse); }, 250);
@@ -751,7 +751,7 @@ const wordUI = function(word: string, entry: any, setOptionWord: boolean = false
   let saveRow = 0;
   let saveCol = 0;
   [saveRow, saveCol] = cbm.locate(0, 0);
-  cbm.locate(33, saveRow);  
+  cbm.locate(cbm.getCols()-7, 0);
 
   cbm.underline(6);
   cbm.lowercase = false;
