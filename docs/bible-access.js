@@ -701,7 +701,7 @@ const wordUI = function (word, entry, setOptionWord = false, setOptionCase = fal
     if (page > 1) {
         cbm.reverse = true;
         const link = cbm.addLink(cbm.chr$(0xA9) + cbm.chr$(0x7F), null);
-        link.onclick = () => setTimeout(() => wordUI(word, entry, false, false, page - 1), 250);
+        link.onclick = () => setTimeout(() => wordUI(word, entry, optionWord, optionCase, page - 1), 250);
         link.normal = link.normal.replace('\x02', '');
         cbm.reverse = false;
     }
@@ -710,7 +710,7 @@ const wordUI = function (word, entry, setOptionWord = false, setOptionCase = fal
     cbm.out(' ');
     if (page < totalPages) {
         const link = cbm.addLink(cbm.chr$(0x7F) + cbm.chr$(0xA9), null);
-        link.onclick = () => setTimeout(() => wordUI(word, entry, false, false, page + 1), 250);
+        link.onclick = () => setTimeout(() => wordUI(word, entry, optionWord, optionCase, page + 1), 250);
         link.normal = link.normal.replace('\x02', '');
     }
     cbm.locate(0, 2);
