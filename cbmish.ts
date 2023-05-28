@@ -45,6 +45,8 @@ class CbmishConsole {
     public sprites = [];
     public font: number[] = c64_char_rom;
 
+    private boundingBox = null;
+
     palette: number[][] = [
         [0, 0, 0, 255],       // [0] black
         [255, 255, 255, 255], // [1] white
@@ -141,6 +143,7 @@ class CbmishConsole {
 
     public init(colors = {border: 14, background: 6, foreground: 14}) {
         this.hideCursor();
+        this.boundingBox = null;
         this.reverse = false;
         this.lowercase = true;
         this.underlined = false;
@@ -252,7 +255,14 @@ class CbmishConsole {
             petscii = this.ascii_to_petscii(c);
         }
 
-        if (this.reverse)
+        if (this.boundingBox != null 
+            && (this.col < this.boundingBox.left 
+            || this.col >= this.boundingBox.right
+            || this.row < this.boundingBox.top
+            || this.row >= this.boundingBox.bottom)) 
+         return; 
+
+         if (this.reverse)
             petscii += 128;
         const i = petscii*8;
 
@@ -478,6 +488,14 @@ class CbmishConsole {
         if (address >= 1024 && address < 1024+this.rows*this.cols)
             this.pokeScreen(address, value);
         else if (address >= 13.5*4096 && address < 13.5*4096+this.rows*this.cols) {
+            let col = address - 13.5*4096 % this.rows;
+            let row = Math.floor(address - 13.5*4096 / this.rows);
+            if (this.boundingBox != null 
+                && (col < this.boundingBox.left 
+                || col >= this.boundingBox.right
+                || row < this.boundingBox.top
+                || row >= this.boundingBox.bottom)) 
+             return; 
             this.colorCells[address - 13.5*4096] = value & 0xF;
             let c = this.charCells[address - 13.5*4096];
             this.pokeScreen(address - 13.5*4096 + 1024, c);
@@ -504,6 +522,13 @@ class CbmishConsole {
 
         const col = (address - 1024) % this.cols;
         const row = Math.floor((address - 1024) / this.cols);
+
+        if (this.boundingBox != null 
+            && (col < this.boundingBox.left 
+            || col >= this.boundingBox.right
+            || row < this.boundingBox.top
+            || row >= this.boundingBox.bottom)) 
+         return; 
 
         const chardata = this.font.slice(i, i+8);
 
@@ -1688,5 +1713,13 @@ class CbmishConsole {
         this.colorCells = [...video.colors];
         for (let i=0; i<size; ++i)
             this.pokeScreen(1024+i, video.chars[i]);
+    }
+
+    public setBoundingBox(box: any) {
+        this.boundingBox = box;
+    }
+
+    public clearBoundingBox() {
+        this.setBoundingBox(null);
     }
 }

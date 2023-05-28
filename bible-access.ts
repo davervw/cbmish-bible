@@ -806,29 +806,30 @@ const wordUI = function(word: string, entry: any, setOptionWord: boolean = false
   cbm.underline(3);
 }
 
+// on click go into edit field mode
 const editSearch = function(editLink: any, word: string, page: number, entry: any) {
+  // save screen text, remove all links, restore screen text dim gray
   const savedScreen = cbm.saveVideoMemory();
-  const left = editLink.left;
-  const top = editLink.top;
   cbm.removeButtons();
   for (let i=0; i<savedScreen.colors.length; ++i)
     savedScreen.colors[i] = 15;
   cbm.restoreVideoMemory(savedScreen);
-  cbm.locate(0, top);
+  
+  cbm.locate(0, editLink.top);
   cbm.foreground(1);
-  cbm.out('Search: ')
+  cbm.out('Search: ');
   setTimeout(() => {
-    cbm.locate(left+word.length, top)
-    cbm.blinkCursor();
+    // position to end of value, blink cursor
     cbm.reverse = true;
+    cbm.locate(editLink.right, editLink.top);
+    cbm.out(' '); // do backspace one character keeps reverse
+    cbm.setBoundingBox({ left: editLink.left, top: editLink.top, right: editLink.right, bottom:editLink.bottom });
+    cbm.locate(editLink.left+word.length, editLink.top)
+    cbm.blinkCursor();
   }, 250);
 
-  // on click go into edit field mode
-  //    blink cursor, position to end of value
-  //    save screen text, remove all links, restore screen text dim gray
-  //    redraw label and field in white
   //    restrict cursor & text changes to bounds of field
-  //    stop blinking on Return/Enter/Escape
+  //    stop blinking on Return/Enter/Escape/click out of field bounds
   //    call onreturn() after Return/Enter with text from bounds
   //    exit edit mode, restore value if Escape  
 }
