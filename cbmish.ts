@@ -486,7 +486,7 @@ class CbmishConsole {
             this.blinkCursor();
     }
 
-    private ascii_to_petscii(c: number): number {
+    public ascii_to_petscii(c: number): number {
         if (c < 32) return 32;
         if (c > 127) return 32;
         if (c >= 32 && c <= 63) return c;
@@ -497,6 +497,21 @@ class CbmishConsole {
             if (c >= 64 && c <= 95) return c-64; // @ABC...Z[\]_
             if (c >= 97 && c <= 96+26) return c-96; // TODO: graphics
         }
+        return 32;
+    }
+
+    public petscii_to_ascii(c: number): number {
+        c &= 511;
+        if (c % 128)
+            c ^= 128;
+        if (c >= 0 && c <= 26)
+            return c+64;
+        if (c == 256)
+            return 64;
+        if (c >= 256 && c <= 256+26)
+            return c-256+96;
+        if (c > 256+64 && c <= 256+64+26)
+            return c-256+64;
         return 32;
     }
 

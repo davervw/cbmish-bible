@@ -792,6 +792,8 @@ const wordUI = function(word: string, entry: any, setOptionWord: boolean = false
 
   for (i=(page-1)*perPage; i<results.length && i<page*perPage; ++i) {
     const entry = results[i];
+    if (entry == null)
+      break;
     let text = entry.text.replace('# ', '');
     text = text.replace(/[\[\]#]/g, '')
     let line = `${entry.book} ${entry.chapter}:${entry.verse} ${text}`;
@@ -830,6 +832,13 @@ const editSearch = function(editLink: any, word: string, page: number, entry: an
 
 const exitSearch = function(editLink: any, word: string, page: number, entry: any) {
   // stop editing, blinking on Return/Enter/Escape/click out of field bounds
+  const offset = editLink.top * cbm.getCols() + editLink.left;
+  const size = editLink.right - editLink.left;
+  let value = '';
+  let screen = cbm.saveVideoMemory();
+  for (let i=0; i<size; ++i)
+    value += String.fromCharCode(cbm.petscii_to_ascii(screen.chars[offset+i]));
+  word = value.replace(/^ +/, '').replace(/ +$/, '');
   cbm.reverse = false;
   cbm.clearBoundingBox();
   cbm.hideCursor();

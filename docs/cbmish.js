@@ -432,6 +432,20 @@ class CbmishConsole {
         }
         return 32;
     }
+    petscii_to_ascii(c) {
+        c &= 511;
+        if (c % 128)
+            c ^= 128;
+        if (c >= 0 && c <= 26)
+            return c + 64;
+        if (c == 256)
+            return 64;
+        if (c >= 256 && c <= 256 + 26)
+            return c - 256 + 96;
+        if (c > 256 + 64 && c <= 256 + 64 + 26)
+            return c - 256 + 64;
+        return 32;
+    }
     poke(address, value) {
         let wasBlinking = this.hideCursor();
         if (address >= 1024 && address < 1024 + this.rows * this.cols)
