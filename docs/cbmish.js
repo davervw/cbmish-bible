@@ -155,6 +155,22 @@ class CbmishConsole {
         if (wasBlinking)
             this.blinkCursor();
     }
+    checkCursorWithinBoundingBox() {
+        if (this.boundingBox != null) {
+            if (this.boundingBox.onexit != null && this.col == 0 && this.row == this.boundingBox.bottom) {
+                this.boundingBox.onexit();
+                return;
+            }
+            if (this.col < this.boundingBox.left)
+                this.col = this.boundingBox.left;
+            if (this.col >= this.boundingBox.right)
+                this.col = this.boundingBox.right - 1;
+            if (this.row < this.boundingBox.top)
+                this.row = this.boundingBox.top;
+            if (this.row >= this.boundingBox.bottom)
+                this.row = this.boundingBox.bottom - 1;
+        }
+    }
     outChar(s) {
         if (s.length != 1)
             throw "expected string of exactly one character";
@@ -589,6 +605,7 @@ class CbmishConsole {
         return wasBlinking;
     }
     blinkCursor() {
+        this.checkCursorWithinBoundingBox();
         if (!this.cursorBlinking) {
             this.cursorIntervalId = setInterval(() => this.blinkCursor(), 333);
             this.cursorBlinking = true;
@@ -673,6 +690,8 @@ class CbmishConsole {
             this.insert();
         else if (key == 'Escape') {
             this.escapePressed = true;
+            if (this.boundingBox != null && this.boundingBox.onexit != null)
+                this.boundingBox.onexit();
             return true;
         }
         else if (key == 'Tab') {
@@ -879,8 +898,19 @@ class CbmishConsole {
         for (let button of this.buttons)
             if (button.checkClick(x, y))
                 found = true;
-        if (!found)
+        if (!found) {
+            if (this.boundingBox != null
+                && (x < this.boundingBox.left
+                    || x >= this.boundingBox.right
+                    || y < this.boundingBox.top
+                    || y >= this.boundingBox.bottom)) {
+                console.log('out of bounds');
+                if (this.boundingBox.onexit != null)
+                    this.boundingBox.onexit();
+                return;
+            }
             this.locate(x, y);
+        }
         event.preventDefault();
     }
     onmousemovecanvas(event) {

@@ -743,18 +743,20 @@ const editSearch = function (editLink, word, page, entry) {
     cbm.foreground(1);
     cbm.out('Search: ');
     setTimeout(() => {
-        // position to end of value, blink cursor
+        // position to end of value, restrict to input field, blink cursor
         cbm.reverse = true;
         cbm.locate(editLink.right, editLink.top);
-        cbm.out(' '); // do backspace one character keeps reverse
-        cbm.setBoundingBox({ left: editLink.left, top: editLink.top, right: editLink.right, bottom: editLink.bottom });
+        cbm.setBoundingBox({ left: editLink.left, top: editLink.top, right: editLink.right, bottom: editLink.bottom, onexit: () => { setTimeout(() => exitSearch(editLink, word, page, entry)); } });
         cbm.locate(editLink.left + word.length, editLink.top);
         cbm.blinkCursor();
     }, 250);
-    //    restrict cursor & text changes to bounds of field
-    //    stop blinking on Return/Enter/Escape/click out of field bounds
-    //    call onreturn() after Return/Enter with text from bounds
-    //    exit edit mode, restore value if Escape  
+};
+const exitSearch = function (editLink, word, page, entry) {
+    // stop editing, blinking on Return/Enter/Escape/click out of field bounds
+    cbm.reverse = false;
+    cbm.clearBoundingBox();
+    cbm.hideCursor();
+    wordUI(word, entry, optionWord, optionCase, page);
 };
 const buildWholeWordControl = function (word, page, entry) {
     let label = `[${optionWord ? 'X' : ' '}] word`;
