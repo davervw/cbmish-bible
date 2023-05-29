@@ -829,6 +829,7 @@ const editSearch = function(editLink: any, word: string, page: number, entry: an
     cbm.blinkCursor();
     if (mobileAndTabletCheck()) {
       var result = prompt('Search:', word);
+      cbm.clearBoundingBox();
       if (result != null) {
         cbm.locate(editLink.left, editLink.top);
         cbm.out(result.padEnd(editLink.right-editLink.left, ' '));
