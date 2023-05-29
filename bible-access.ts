@@ -830,7 +830,7 @@ const editSearch = function(editLink: any, word: string, page: number, entry: an
     if (mobileAndTabletCheck()) {
       var result = prompt('Search:', word);
       cbm.locate(editLink.left, editLink.top);
-      cbm.out(word.padEnd(editLink.right-editLink.left, ' '));
+      cbm.out(result.padEnd(editLink.right-editLink.left, ' '));
       exitSearch(editLink, word, page, entry);
     }
   }, 250);
