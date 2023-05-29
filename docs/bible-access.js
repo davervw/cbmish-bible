@@ -756,6 +756,7 @@ const editSearch = function (editLink, word, page, entry) {
             if (result != null) {
                 cbm.locate(editLink.left, editLink.top);
                 cbm.out(result.padEnd(editLink.right - editLink.left, ' '));
+                cbm.locate(0, editLink.bottom); // simulate Enter key
             }
             exitSearch(editLink, word, page, entry);
         }
