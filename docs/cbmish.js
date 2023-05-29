@@ -158,7 +158,9 @@ class CbmishConsole {
     checkCursorWithinBoundingBox() {
         if (this.boundingBox != null) {
             if (this.boundingBox.onexit != null && this.col == 0 && this.row == this.boundingBox.bottom) {
-                this.boundingBox.onexit();
+                const onexit = this.boundingBox.onexit;
+                this.clearBoundingBox();
+                onexit();
                 return;
             }
             if (this.col < this.boundingBox.left)
@@ -704,8 +706,11 @@ class CbmishConsole {
             this.insert();
         else if (key == 'Escape') {
             this.escapePressed = true;
-            if (this.boundingBox != null && this.boundingBox.onexit != null)
-                this.boundingBox.onexit();
+            if (this.boundingBox != null && this.boundingBox.onexit != null) {
+                const onexit = this.boundingBox.onexit;
+                this.clearBoundingBox();
+                onexit();
+            }
             return true;
         }
         else if (key == 'Tab') {
@@ -918,9 +923,11 @@ class CbmishConsole {
                     || x >= this.boundingBox.right
                     || y < this.boundingBox.top
                     || y >= this.boundingBox.bottom)) {
-                console.log('out of bounds');
-                if (this.boundingBox.onexit != null)
-                    this.boundingBox.onexit();
+                if (this.boundingBox.onexit != null) {
+                    const onexit = this.boundingBox.onexit;
+                    this.clearBoundingBox();
+                    onexit();
+                }
                 return;
             }
             this.locate(x, y);

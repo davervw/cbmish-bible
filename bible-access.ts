@@ -845,15 +845,19 @@ const mobileAndTabletCheck = function() {
 
 const exitSearch = function(editLink: any, word: string, page: number, entry: any) {
   // stop editing, blinking on Return/Enter/Escape/click out of field bounds
-  const offset = editLink.top * cbm.getCols() + editLink.left;
-  const size = editLink.right - editLink.left;
-  let value = '';
-  let screen = cbm.saveVideoMemory();
-  for (let i=0; i<size; ++i)
-    value += String.fromCharCode(cbm.petscii_to_ascii(screen.chars[offset+i]));
-  word = value.replace(/^ +/, '').replace(/ +$/, '');
+  let row = 0;
+  let col = 0;
+  [row, col] = cbm.locate(0, 0);
+  if (col == 0 && row == editLink.bottom) { // pressed ENTER, not Escape or click off
+    const offset = editLink.top * cbm.getCols() + editLink.left;
+    const size = editLink.right - editLink.left;
+      let value = '';
+    let screen = cbm.saveVideoMemory();
+    for (let i=0; i<size; ++i)
+      value += String.fromCharCode(cbm.petscii_to_ascii(screen.chars[offset+i]));
+    word = value.replace(/^ +/, '').replace(/ +$/, '');
+  }
   cbm.reverse = false;
-  cbm.clearBoundingBox();
   cbm.hideCursor();
   wordUI(word, entry, optionWord, optionCase, page);
 }
