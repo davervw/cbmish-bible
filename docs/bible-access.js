@@ -139,6 +139,12 @@ const booksUI = function () {
         if (col == cols)
             col = 0;
     });
+
+    cbm.locate(0, cbm.getRows()-3);
+    cbm.foreground(14);
+    cbm.addLink('Search', null)
+        .onclick = () => setTimeout( () => wordUI('', findVerse('GENESIS','1','1'), false, false, 1), 250);
+
     addNavigationHelp("[Click BIBLE, or book to navigate]", () => booksUI());
 };
 const bookUI = function (book) {
